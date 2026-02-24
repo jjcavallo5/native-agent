@@ -8,15 +8,28 @@
     "android",
     "ios"
   ],
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "module": "dist/index.js",
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "license": "MIT",
   "author": "Jeremy Cavallo",
   "scripts": {
-    "dev": "appium"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
   },
   "dependencies": {
     "appium": "^3.2.0",
     "appium-uiautomator2-driver": "^7.0.0",
+    "tree-kill": "^1.2.2",
     "typescript": "^5.9.3",
     "webdriverio": "^9.24.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2"
   }
 }

@@ -1,4 +1,5 @@
 import { remote } from 'webdriverio'
+import { spawn } from 'child_process'
 
 const clickButton = async (driver: any, btnTxt: string) => {
   const btn = await driver.$(`//*[@text="${btnTxt}"]`);
