@@ -1,0 +1,22 @@
+{
+  "name": "native-agent",
+  "version": "0.0.1",
+  "description": "A native driver to power agentic development for mobile applications",
+  "keywords": [
+    "agents",
+    "mobile",
+    "android",
+    "ios"
+  ],
+  "license": "MIT",
+  "author": "Jeremy Cavallo",
+  "scripts": {
+    "dev": "appium"
+  },
+  "dependencies": {
+    "appium": "^3.2.0",
+    "appium-uiautomator2-driver": "^7.0.0",
+    "typescript": "^5.9.3",
+    "webdriverio": "^9.24.0"
+  }
+}
