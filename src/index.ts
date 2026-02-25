@@ -1,43 +1,37 @@
-import {remote} from 'webdriverio';
-import {spawn} from 'child_process';
+import treekill from 'tree-kill';
+import {startAppium} from './appium/index.js';
+import {startAndroid} from './devices/android.js';
+import {startServer} from './server/index.js';
 
-const clickButton = async (driver: any, btnTxt: string) => {
-	const btn = await driver.$(`//*[@text="${btnTxt}"]`);
-	await btn.waitForDisplayed();
-	await btn.click();
+const pids: number[] = [];
+let appiumServer: Awaited<ReturnType<typeof startAppium>> | null = null;
+let cleaningUp = false;
+
+const cleanup = () => {
+	if (cleaningUp) return;
+	cleaningUp = true;
+
+	appiumServer?.close();
+	for (const pid of pids) {
+		treekill(pid, 'SIGTERM');
+	}
+
+	process.exit();
 };
 
-const enterText = async (
-	driver: WebdriverIO.Browser,
-	selectorTxt: string,
-	toEnter: string,
-) => {
-	const field = await driver.$(`//*[@text="${selectorTxt}"]`);
-	await field.waitForDisplayed();
-	await field.setValue(toEnter);
-};
+for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP', 'SIGQUIT'] as const) {
+	process.on(signal, cleanup);
+}
+process.on('uncaughtException', cleanup);
+process.on('unhandledRejection', cleanup);
 
 const run = async () => {
-	const driver = await remote({
-		hostname: 'localhost',
-		port: 4723,
-		logLevel: 'info',
-		capabilities: {
-			platformName: 'Android',
-			'appium:automationName': 'UiAutomator2',
-			'appium:deviceName': 'Android',
-			'appium:appPackage': 'com.contractory',
-		},
-	});
-	try {
-		await clickButton(driver, 'Sign In');
-		await enterText(driver, 'Email', process.env.LOGIN_EMAIL!);
-		await enterText(driver, 'Password', process.env.LOGIN_PASS!);
-		await clickButton(driver, 'Sign In');
-	} finally {
-		await driver.pause(100000);
-		await driver.deleteSession();
-	}
+	appiumServer = await startAppium({});
+	const emulator = await startAndroid();
+	const server = await startServer();
+
+	if (emulator.pid) pids.push(emulator.pid);
+	if (server.pid) pids.push(server.pid);
 };
 
-run().catch(console.error);
+run();

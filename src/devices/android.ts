@@ -1,6 +1,6 @@
 import {execSync, spawn} from 'child_process';
 
-export const runAndroid = async () => {
+export const startAndroid = async () => {
 	const androidHome = process.env.ANDROID_HOME;
 	if (!androidHome) {
 		throw new Error('ANDROID_HOME environment variable is not set');
