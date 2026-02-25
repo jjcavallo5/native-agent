@@ -35,10 +35,14 @@
     // Recommended Options
     "strict": true,
     "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
+    // Disabled due to appium shipping raw .ts type files that are CJS
+    // (skipLibCheck only covers .d.ts, not .ts in node_modules)
+    // "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-  }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }

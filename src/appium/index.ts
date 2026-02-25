@@ -1,4 +1,4 @@
-import {main} from 'appium';
+import appium from 'appium';
 
 export const startAppium = async ({
 	port,
@@ -7,7 +7,7 @@ export const startAppium = async ({
 	port?: number;
 	address?: string;
 }) => {
-	return main({
+	return appium.main({
 		port: port ?? 4723,
 		address: address ?? '0.0.0.0',
 	});
