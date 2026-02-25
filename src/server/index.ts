@@ -20,10 +20,7 @@ export const startServer = async () => {
 
 	const server = spawn(execPath, args, {
 		stdio: 'inherit',
-		detached: true,
 	});
-
-	server.unref();
 
 	return server;
 };

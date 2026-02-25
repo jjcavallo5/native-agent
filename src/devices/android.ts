@@ -22,10 +22,7 @@ export const startAndroid = async () => {
 	// Launch the emulator with the device
 	const emulator = spawn(`${androidHome}/emulator/emulator`, ['-avd', device], {
 		stdio: 'inherit',
-		detached: true,
 	});
-
-	emulator.unref();
 
 	return emulator;
 };
