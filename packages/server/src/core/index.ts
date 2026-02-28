@@ -13,13 +13,19 @@ export const getServer = ({driver, port}: {driver: Browser; port: number}) => {
 		port,
 		hostname: 'localhost',
 		routes: {
-			'/': () => Response.json({success: true}, {status: 200}),
-			'/click': (request: Request) => click({driver, request}),
-			'/tap': (request: Request) => tap({driver, request}),
-			'/text': (request: Request) => text({driver, request}),
-			'/swipe': (request: Request) => swipe({driver, request}),
-			'/view': () => view({driver}),
-			'/get-size': () => getSize({driver}),
+			'/': async () => Response.json({success: true}, {status: 200}),
+			'/click': async (request: Request) => await click({driver, request}),
+			'/tap': async (request: Request) => await tap({driver, request}),
+			'/text': async (request: Request) => await text({driver, request}),
+			'/swipe': async (request: Request) => await swipe({driver, request}),
+			'/view': async () => await view({driver}),
+			'/get-size': async () => await getSize({driver}),
+		},
+		fetch(request) {
+			console.log(
+				`[${request.method}]: ${new URL(request.url).pathname}   404`,
+			);
+			return Response.json({error: 'Not found'}, {status: 404});
 		},
 	});
 };
@@ -31,6 +37,7 @@ export const startServer = async ({
 	appiumPort?: number;
 	serverPort?: number;
 }) => {
+	console.log('Starting server...');
 	const driver = await getDriver({port: appiumPort, device: 'android'});
 	return getServer({driver, port: serverPort});
 };

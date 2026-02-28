@@ -5,7 +5,9 @@ export {getDriver} from './driver';
 
 export const startAppium = ({port = APPIUM_PORT}: {port?: number}) => {
 	return spawn(['appium', '-p', `${port}`], {
-		stdio: ['inherit', 'inherit', 'inherit'],
+		stdin: 'inherit',
+		stdout: 'pipe',
+		stderr: 'inherit',
 	});
 };
 

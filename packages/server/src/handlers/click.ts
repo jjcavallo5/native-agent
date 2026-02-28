@@ -14,10 +14,16 @@ export const click = async ({
 	driver: Browser;
 	request: Request;
 }) => {
-	const {target} = ClickSchema.parse(await request.json());
-	const field = await driver.$(`//*[@text="${target}"]`);
-	await field.waitForDisplayed();
-	await field.click();
-	await sleep(500);
-	return view({driver});
+	try {
+		const {target} = ClickSchema.parse(await request.json());
+		console.log(`[POST]: /click   target="${target}"`);
+		const field = await driver.$(`//*[@text="${target}"]`);
+		await field.waitForDisplayed();
+		await field.click();
+		await sleep(500);
+		return view({driver});
+	} catch (e) {
+		console.error(`[POST]: /click failed`, e);
+		return Response.json({error: 'Click failed'}, {status: 500});
+	}
 };
