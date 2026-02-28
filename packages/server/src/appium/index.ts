@@ -1,10 +1,10 @@
-import {spawn} from 'bun';
+import {spawn} from 'child_process';
 import {APPIUM_PORT} from '..';
 
 export {getDriver} from './driver';
 
 export const startAppium = ({port = APPIUM_PORT}: {port?: number}) => {
-	return spawn(['appium', '-p', `${port}`], {
+	return spawn('appium', ['-p', `${port}`], {
 		stdin: 'inherit',
 		stdout: 'pipe',
 		stderr: 'inherit',

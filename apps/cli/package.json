@@ -1,16 +1,34 @@
 {
   "name": "native-agent",
-  "module": "src/index.ts",
+  "version": "0.1.0",
   "type": "module",
+  "bin": {
+    "native-agent": "./dist/index.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "prepublishOnly": "npm run build"
+  },
   "dependencies": {
-    "@native-agent/devices": "*",
-    "@native-agent/server": "*",
-    "commander": "^14.0.3"
+    "commander": "^14.0.3",
+    "express": "^5.2.1",
+    "webdriverio": "^9.24.0",
+    "sharp": "^0.34.5",
+    "tree-kill": "^1.2.2",
+    "zod": "^4.3.6"
+  },
+  "optionalDependencies": {
+    "appium": "^3.2.0",
+    "appium-uiautomator2-driver": "^7.0.0"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@native-agent/devices": "*",
+    "@native-agent/server": "*",
+    "@types/express": "^5.0.6",
+    "tsup": "^8.5.0"
   },
-  "peerDependencies": {
-    "typescript": "^5"
+  "engines": {
+    "node": ">=18"
   }
 }

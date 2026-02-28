@@ -1,7 +1,8 @@
 import {type Browser} from 'webdriverio';
 import {view} from './view';
 import z from 'zod';
-import {sleep} from 'bun';
+import {sleep} from '@/utils';
+import type {Request, Response} from 'express';
 
 const ClickSchema = z.object({
 	target: z.string(),
@@ -9,21 +10,23 @@ const ClickSchema = z.object({
 
 export const click = async ({
 	driver,
-	request,
+	req,
+	res,
 }: {
 	driver: Browser;
-	request: Request;
+	req: Request;
+	res: Response;
 }) => {
 	try {
-		const {target} = ClickSchema.parse(await request.json());
+		const {target} = ClickSchema.parse(req.body);
 		console.log(`[POST]: /click   target="${target}"`);
 		const field = await driver.$(`//*[@text="${target}"]`);
 		await field.waitForDisplayed();
 		await field.click();
 		await sleep(500);
-		return view({driver});
+		return view({driver, res});
 	} catch (e) {
 		console.error(`[POST]: /click failed`, e);
-		return Response.json({error: 'Click failed'}, {status: 500});
+		res.status(500).json({error: 'Click failed'});
 	}
 };

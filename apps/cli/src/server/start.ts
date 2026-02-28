@@ -22,5 +22,7 @@ export const start = async ({
 	});
 	await waitForAppium({port: APPIUM_PORT});
 	const server = await startServer({appiumPort: APPIUM_PORT, serverPort});
-	console.log(`Native Agent server listening on http://localhost:${server.port}`);
+	const addr = server.address();
+	const listeningPort = typeof addr === 'object' && addr ? addr.port : serverPort;
+	console.log(`Native Agent server listening on http://localhost:${listeningPort}`);
 };
