@@ -30,6 +30,7 @@
     "start": "node dist/index.js",
     "dev": "node --import tsx/esm src/index.ts"
   },
+  "workspaces": ["packages/*", "apps/*"],
   "dependencies": {
     "appium": "^3.2.0",
     "appium-uiautomator2-driver": "^7.0.0",
