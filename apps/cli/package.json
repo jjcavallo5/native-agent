@@ -28,6 +28,11 @@
     "@types/express": "^5.0.6",
     "tsup": "^8.5.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jjcavallo5/native-agent",
+    "directory": "apps/cli"
+  },
   "engines": {
     "node": ">=18"
   }
