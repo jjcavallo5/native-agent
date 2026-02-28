@@ -1,7 +1,10 @@
 {
-  "name": "server",
+  "name": "@native-agent/server",
   "module": "index.ts",
   "type": "module",
+  "dependencies": {
+    "@native-agent/core": "*",
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },

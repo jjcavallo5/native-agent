@@ -1,5 +1,5 @@
 {
-  "name": "core",
+  "name": "@native-agent/core",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {

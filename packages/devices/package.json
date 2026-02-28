@@ -1,5 +1,5 @@
 {
-  "name": "devices",
+  "name": "@native-agent/devices",
   "module": "index.ts",
   "type": "module",
   "private": true,

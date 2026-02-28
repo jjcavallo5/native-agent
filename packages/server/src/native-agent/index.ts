@@ -1,3 +1,5 @@
+import { click } from '@native-agent/core'
+
 export const getServer = () => {
   return Bun.serve({
     port: 8647,
