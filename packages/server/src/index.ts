@@ -1,1 +1,2 @@
-export { startAppium } from './appium/index'
+export {startAppium} from './appium/index';
+export {startServer} from './core/index';

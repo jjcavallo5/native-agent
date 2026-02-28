@@ -5,6 +5,7 @@ import {tap} from '@/handlers/tap';
 import {view} from '@/handlers/view';
 import {text} from '@/handlers/text';
 import {type Browser} from 'webdriverio';
+import {getDriver} from '@/appium';
 
 export const getServer = ({driver}: {driver: Browser}) => {
 	return Bun.serve({
@@ -38,4 +39,9 @@ export const getServer = ({driver}: {driver: Browser}) => {
 			},
 		},
 	});
+};
+
+export const startServer = async () => {
+	const driver = await getDriver({port: 8647, device: 'android'});
+	return getServer({driver});
 };
