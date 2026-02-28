@@ -1,8 +1,9 @@
-import { spawn } from "bun";
+import {spawn} from 'bun';
+
+export {getDriver} from './driver';
 
 export const startAppium = () => {
-  return spawn(['appium'], {
-    stdio: ["inherit", "inherit", "inherit"],
-  });
-}
-
+	return spawn(['appium'], {
+		stdio: ['inherit', 'inherit', 'inherit'],
+	});
+};

@@ -8,6 +8,9 @@
     "jsx": "react-jsx",
     "allowJs": true,
     "rootDir": "./src",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
 
     // Bundler mode
     "moduleResolution": "bundler",

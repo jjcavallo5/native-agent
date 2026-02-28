@@ -1,16 +1,12 @@
-import {
-	click,
-	view,
-	tap,
-	swipe,
-	text,
-	getSize,
-	getDriver,
-} from '@native-agent/core';
+import {click} from '@/handlers/click';
+import {getSize} from '@/handlers/get-size';
+import {swipe} from '@/handlers/swipe';
+import {tap} from '@/handlers/tap';
+import {view} from '@/handlers/view';
+import {text} from '@/handlers/text';
+import {type Browser} from 'webdriverio';
 
-type Driver = Awaited<ReturnType<typeof getDriver>>;
-
-export const getServer = ({driver}: {driver: Driver}) => {
+export const getServer = ({driver}: {driver: Browser}) => {
 	return Bun.serve({
 		port: 8647,
 		hostname: '0.0.0.0',
