@@ -6,10 +6,11 @@ import {view} from '@/handlers/view';
 import {text} from '@/handlers/text';
 import {type Browser} from 'webdriverio';
 import {getDriver} from '@/appium';
+import {NATIVE_AGENT_PORT, APPIUM_PORT} from '..';
 
-export const getServer = ({driver}: {driver: Browser}) => {
+export const getServer = ({driver, port}: {driver: Browser; port: number}) => {
 	return Bun.serve({
-		port: 8647,
+		port,
 		hostname: '0.0.0.0',
 		routes: {
 			'/': () => Response.json({success: true}, {status: 200}),
@@ -41,7 +42,13 @@ export const getServer = ({driver}: {driver: Browser}) => {
 	});
 };
 
-export const startServer = async () => {
-	const driver = await getDriver({port: 8647, device: 'android'});
-	return getServer({driver});
+export const startServer = async ({
+	appiumPort = APPIUM_PORT,
+	serverPort = NATIVE_AGENT_PORT,
+}: {
+	appiumPort?: number;
+	serverPort?: number;
+}) => {
+	const driver = await getDriver({port: appiumPort, device: 'android'});
+	return getServer({driver, port: serverPort});
 };
