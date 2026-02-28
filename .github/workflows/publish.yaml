@@ -4,7 +4,7 @@ on:
     tags: v*
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
 
     permissions:
@@ -18,5 +18,13 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
 
-      - run: npm ci
-      - run: npm publish --ignore-scripts
+      - run: npm install
+        working-directory: apps/cli
+
+      - run: npm run build
+        working-directory: apps/cli
+
+      - run: npm publish --provenance --access public
+        working-directory: apps/cli
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

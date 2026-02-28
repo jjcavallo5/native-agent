@@ -1,5 +1,6 @@
 {
-  "name": "native-agent",
+  "name": "native-agent-monorepo",
+  "private": true,
   "version": "0.0.1",
   "description": "A native driver to power agentic development for mobile applications",
   "keywords": [
