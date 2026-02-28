@@ -1,5 +1,6 @@
 import {click} from '@/handlers/click';
 import {getSize} from '@/handlers/get-size';
+import {open} from '@/handlers/open';
 import {swipe} from '@/handlers/swipe';
 import {tap} from '@/handlers/tap';
 import {view} from '@/handlers/view';
@@ -18,6 +19,7 @@ export const getServer = ({driver, port}: {driver: Browser; port: number}) => {
 			'/tap': async (request: Request) => await tap({driver, request}),
 			'/text': async (request: Request) => await text({driver, request}),
 			'/swipe': async (request: Request) => await swipe({driver, request}),
+			'/open': async (request: Request) => await open({driver, request}),
 			'/view': async () => await view({driver}),
 			'/get-size': async () => await getSize({driver}),
 		},

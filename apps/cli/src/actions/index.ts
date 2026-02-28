@@ -5,6 +5,7 @@ import {text} from './text';
 import {swipe} from './swipe';
 import {view} from './view';
 import {getSize} from './get-size';
+import {open} from './open';
 
 export const registerActions = (program: Command) => {
 	program
@@ -66,4 +67,10 @@ export const registerActions = (program: Command) => {
 		.command('get-size')
 		.description('Get viewport dimensions')
 		.action(getSize);
+
+	program
+		.command('open')
+		.description('Open an app by its app ID (bundleId on iOS, package ID on Android)')
+		.argument('<appId>', 'App identifier to open (e.g. com.android.settings)')
+		.action(open);
 };

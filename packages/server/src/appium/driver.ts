@@ -21,8 +21,7 @@ const getAndroidDriverCapabilities = () => {
 		platformName: 'Android',
 		'appium:automationName': 'UiAutomator2',
 		'appium:deviceName': 'Android',
-		'appium:appPackage': 'com.android.settings',
-		'appium:appActivity': '.Settings',
+		'appium:autoLaunch': false,
 		'appium:newCommandTimeout': 0,
 	};
 };
