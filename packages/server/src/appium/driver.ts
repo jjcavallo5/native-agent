@@ -10,7 +10,7 @@ export const getDriver = ({
 	const webdriverOptions = {
 		hostname: 'localhost',
 		port,
-		logLevel: 'info' as const,
+		logLevel: 'error' as const,
 		capabilities: device === 'android' ? getAndroidDriverCapabilities() : {},
 	};
 	return remote(webdriverOptions);

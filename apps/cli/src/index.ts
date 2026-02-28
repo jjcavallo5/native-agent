@@ -2,6 +2,7 @@ import {Command} from 'commander';
 import {getVersion} from './lib/utils';
 import {registerActions} from './actions';
 import {serverCmd} from './server';
+import {deviceCmd} from './device';
 
 const program = new Command();
 
@@ -13,5 +14,6 @@ program
 registerActions(program);
 
 program.addCommand(serverCmd);
+program.addCommand(deviceCmd);
 
 program.parse();

@@ -12,8 +12,8 @@ export const start = (port: string, headless: boolean, device: string) => {
 		serverPort = port ? parseInt(port) : NATIVE_AGENT_PORT;
 	} catch (e) {}
 
-	startAppium({
-		port: APPIUM_PORT,
-	});
+	// startAppium({
+	// 	port: APPIUM_PORT,
+	// });
 	startServer({appiumPort: APPIUM_PORT, serverPort});
 };
