@@ -21,7 +21,7 @@ export const getServer = ({driver}: {driver: Browser}) => {
 				const result = await tap({driver, request});
 				return Response.json(result, {status: 200});
 			},
-			'/type': async (request: Request) => {
+			'/text': async (request: Request) => {
 				const result = await text({driver, request});
 				return Response.json(result, {status: 200});
 			},
