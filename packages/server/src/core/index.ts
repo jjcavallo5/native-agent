@@ -11,33 +11,15 @@ import {NATIVE_AGENT_PORT, APPIUM_PORT} from '..';
 export const getServer = ({driver, port}: {driver: Browser; port: number}) => {
 	return Bun.serve({
 		port,
-		hostname: '0.0.0.0',
+		hostname: 'localhost',
 		routes: {
 			'/': () => Response.json({success: true}, {status: 200}),
-			'/click': async (request: Request) => {
-				const result = await click({driver, request});
-				return Response.json(result, {status: 200});
-			},
-			'/tap': async (request: Request) => {
-				const result = await tap({driver, request});
-				return Response.json(result, {status: 200});
-			},
-			'/text': async (request: Request) => {
-				const result = await text({driver, request});
-				return Response.json(result, {status: 200});
-			},
-			'/swipe': async (request: Request) => {
-				const result = await swipe({driver, request});
-				return Response.json(result, {status: 200});
-			},
-			'/view': async () => {
-				const result = await view({driver});
-				return Response.json(result, {status: 200});
-			},
-			'/get-size': async () => {
-				const result = await getSize({driver});
-				return Response.json(result, {status: 200});
-			},
+			'/click': (request: Request) => click({driver, request}),
+			'/tap': (request: Request) => tap({driver, request}),
+			'/text': (request: Request) => text({driver, request}),
+			'/swipe': (request: Request) => swipe({driver, request}),
+			'/view': () => view({driver}),
+			'/get-size': () => getSize({driver}),
 		},
 	});
 };

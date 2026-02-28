@@ -23,5 +23,6 @@ const getAndroidDriverCapabilities = () => {
 		'appium:deviceName': 'Android',
 		'appium:appPackage': 'com.android.settings',
 		'appium:appActivity': '.Settings',
+		'appium:newCommandTimeout': 0,
 	};
 };

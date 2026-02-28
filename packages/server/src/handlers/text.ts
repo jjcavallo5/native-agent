@@ -8,7 +8,7 @@ const TypeSchema = z.object({
 })
 
 export const text = async ({ driver, request }: { driver: Browser, request: Request }) => {
-  const { target, text } = TypeSchema.parse(request.body);
+  const { target, text } = TypeSchema.parse(await request.json());
   const field = await driver.$(`//*[@text="${target}"]`);
   await field.waitForDisplayed();
   await field.setValue(text);

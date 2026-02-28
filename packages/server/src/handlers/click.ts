@@ -7,7 +7,7 @@ const ClickSchema = z.object({
 })
 
 export const click = async ({ driver, request }: { driver: Browser, request: Request }) => {
-  const { target } = ClickSchema.parse(request.body);
+  const { target } = ClickSchema.parse(await request.json());
   const field = await driver.$(`//*[@text="${target}"]`);
   await field.waitForDisplayed();
   await field.click();

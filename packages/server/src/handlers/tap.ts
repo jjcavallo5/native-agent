@@ -8,7 +8,7 @@ const TapSchema = z.object({
 })
 
 export const tap = async ({ driver, request }: { driver: Browser, request: Request }) => {
-  const { x, y } = TapSchema.parse(request.body);
+  const { x, y } = TapSchema.parse(await request.json());
   await driver.performActions([
     {
       type: 'pointer',
