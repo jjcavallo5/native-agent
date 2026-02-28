@@ -1,7 +1,8 @@
 import {type Browser} from 'webdriverio';
 import z from 'zod';
 import {view} from './view';
-import {sleep} from 'bun';
+import {sleep} from '@/utils';
+import type {Request, Response} from 'express';
 
 const TapSchema = z.object({
 	x: z.number(),
@@ -10,13 +11,15 @@ const TapSchema = z.object({
 
 export const tap = async ({
 	driver,
-	request,
+	req,
+	res,
 }: {
 	driver: Browser;
-	request: Request;
+	req: Request;
+	res: Response;
 }) => {
 	try {
-		const {x, y} = TapSchema.parse(await request.json());
+		const {x, y} = TapSchema.parse(req.body);
 		console.log(`[POST]: /tap   x=${x}, y=${y}`);
 		await driver.performActions([
 			{
@@ -34,9 +37,9 @@ export const tap = async ({
 		await driver.releaseActions();
 
 		await sleep(500);
-		return view({driver});
+		return view({driver, res});
 	} catch (e) {
 		console.error(JSON.stringify(e, null, 2));
-		return Response.json({error: 'Tap failed'}, {status: 500});
+		res.status(500).json({error: 'Tap failed'});
 	}
 };

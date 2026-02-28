@@ -1,3 +1,4 @@
+import express from 'express';
 import {click} from '@/handlers/click';
 import {getSize} from '@/handlers/get-size';
 import {open} from '@/handlers/open';
@@ -10,25 +11,50 @@ import {getDriver} from '@/appium';
 import {NATIVE_AGENT_PORT, APPIUM_PORT} from '..';
 
 export const getServer = ({driver, port}: {driver: Browser; port: number}) => {
-	return Bun.serve({
-		port,
-		hostname: 'localhost',
-		routes: {
-			'/': async () => Response.json({success: true}, {status: 200}),
-			'/click': async (request: Request) => await click({driver, request}),
-			'/tap': async (request: Request) => await tap({driver, request}),
-			'/text': async (request: Request) => await text({driver, request}),
-			'/swipe': async (request: Request) => await swipe({driver, request}),
-			'/open': async (request: Request) => await open({driver, request}),
-			'/view': async () => await view({driver}),
-			'/get-size': async () => await getSize({driver}),
-		},
-		fetch(request) {
-			console.log(
-				`[${request.method}]: ${new URL(request.url).pathname}   404`,
-			);
-			return Response.json({error: 'Not found'}, {status: 404});
-		},
+	const app = express();
+	app.use(express.json());
+
+	app.all('/', (_req, res) => {
+		res.json({success: true});
+	});
+
+	app.post('/click', async (req, res) => {
+		await click({driver, req, res});
+	});
+
+	app.post('/tap', async (req, res) => {
+		await tap({driver, req, res});
+	});
+
+	app.post('/text', async (req, res) => {
+		await text({driver, req, res});
+	});
+
+	app.post('/swipe', async (req, res) => {
+		await swipe({driver, req, res});
+	});
+
+	app.post('/open', async (req, res) => {
+		await open({driver, req, res});
+	});
+
+	app.get('/view', async (_req, res) => {
+		await view({driver, res});
+	});
+
+	app.get('/get-size', async (_req, res) => {
+		await getSize({driver, res});
+	});
+
+	app.use((req, res) => {
+		console.log(`[${req.method}]: ${req.path}   404`);
+		res.status(404).json({error: 'Not found'});
+	});
+
+	return new Promise<ReturnType<typeof app.listen>>((resolve) => {
+		const server = app.listen(port, 'localhost', () => {
+			resolve(server);
+		});
 	});
 };
 

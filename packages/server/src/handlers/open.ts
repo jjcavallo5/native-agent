@@ -1,7 +1,8 @@
 import {type Browser} from 'webdriverio';
 import {view} from './view';
 import z from 'zod';
-import {sleep} from 'bun';
+import {sleep} from '@/utils';
+import type {Request, Response} from 'express';
 
 const OpenSchema = z.object({
 	appId: z.string(),
@@ -9,19 +10,21 @@ const OpenSchema = z.object({
 
 export const open = async ({
 	driver,
-	request,
+	req,
+	res,
 }: {
 	driver: Browser;
-	request: Request;
+	req: Request;
+	res: Response;
 }) => {
 	try {
-		const {appId} = OpenSchema.parse(await request.json());
+		const {appId} = OpenSchema.parse(req.body);
 		console.log(`[POST]: /open   appId="${appId}"`);
 		await driver.activateApp(appId);
 		await sleep(500);
-		return view({driver});
+		return view({driver, res});
 	} catch (e) {
 		console.error(`[POST]: /open failed`, e);
-		return Response.json({error: 'Open failed'}, {status: 500});
+		res.status(500).json({error: 'Open failed'});
 	}
 };

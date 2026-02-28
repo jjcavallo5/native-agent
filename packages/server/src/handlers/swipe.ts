@@ -1,7 +1,8 @@
 import {type Browser} from 'webdriverio';
 import {view} from './view';
 import z from 'zod';
-import {sleep} from 'bun';
+import {sleep} from '@/utils';
+import type {Request, Response} from 'express';
 
 const PointSchema = z.object({
 	x: z.number().lte(1.0).gte(0.0),
@@ -15,13 +16,15 @@ const SwipeSchema = z.object({
 
 export const swipe = async ({
 	driver,
-	request,
+	req,
+	res,
 }: {
 	driver: Browser;
-	request: Request;
+	req: Request;
+	res: Response;
 }) => {
 	try {
-		const {start, end} = SwipeSchema.parse(await request.json());
+		const {start, end} = SwipeSchema.parse(req.body);
 		console.log(`[POST]: /swipe   start=(${start.x},${start.y}) end=(${end.x},${end.y})`);
 		const {width, height} = await driver.getWindowSize();
 
@@ -52,9 +55,9 @@ export const swipe = async ({
 		await driver.releaseActions();
 
 		await sleep(500);
-		return view({driver});
+		return view({driver, res});
 	} catch (e) {
 		console.error(`[POST]: /swipe failed`, e);
-		return Response.json({error: 'Swipe failed'}, {status: 500});
+		res.status(500).json({error: 'Swipe failed'});
 	}
 };

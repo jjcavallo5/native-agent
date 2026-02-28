@@ -1,4 +1,4 @@
-import {getVersion} from '@/lib/utils';
+import {getVersion} from '../lib/utils';
 import {Command} from 'commander';
 import {start} from './start';
 import {NATIVE_AGENT_PORT} from '@native-agent/server';
