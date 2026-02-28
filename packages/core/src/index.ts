@@ -2,6 +2,10 @@ import { remote } from "webdriverio"
 
 export { view } from './handlers/view'
 export { click } from './handlers/click'
+export { tap } from './handlers/tap'
+export { swipe } from './handlers/swipe'
+export { text } from './handlers/type'
+export { getSize } from './handlers/get-size'
 
 export const getDriver = ({ port, device }: { port: number, device: 'ios' | 'android' }) => {
   const webdriverOptions = {

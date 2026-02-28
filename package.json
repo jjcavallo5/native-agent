@@ -1,4 +1,5 @@
 {
+  "workspaces": ["packages/*"],
   "name": "native-agent",
   "version": "0.0.1",
   "description": "A native driver to power agentic development for mobile applications",

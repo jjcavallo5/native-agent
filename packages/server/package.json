@@ -1,6 +1,7 @@
 {
   "name": "@native-agent/server",
-  "module": "index.ts",
+  "module": "src/index.ts",
+  "types": "src/index.ts",
   "type": "module",
   "dependencies": {
     "@native-agent/core": "*",

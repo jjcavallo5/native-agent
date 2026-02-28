@@ -1,6 +1,7 @@
 {
   "name": "@native-agent/devices",
-  "module": "index.ts",
+  "module": "src/index.ts",
+  "types": "src/index.ts",
   "type": "module",
   "private": true,
   "devDependencies": {
