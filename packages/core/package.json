@@ -9,6 +9,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "sharp": "^0.34.5",
     "webdriverio": "^9.24.0",
     "zod": "^4.3.6"
   }
