@@ -1,5 +1,7 @@
 import { remote } from "webdriverio"
 
+export { view } from './handlers/view'
+export { click } from './handlers/click'
 
 export const getDriver = ({ port, device }: { port: number, device: 'ios' | 'android' }) => {
   const webdriverOptions = {
