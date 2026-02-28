@@ -1,0 +1,14 @@
+import { type Browser } from "webdriverio";
+import z from "zod";
+
+const ClickSchema = z.object({
+  target: z.string(),
+})
+
+export const click = async ({ driver, request }: { driver: Browser, request: Request }) => {
+  const { target } = ClickSchema.parse(request.body);
+  const field = await driver.$(`//*[@text="${target}"]`);
+  await field.waitForDisplayed();
+  await field.click();
+  return Response.json({ success: true }, { status: 200 })
+}
