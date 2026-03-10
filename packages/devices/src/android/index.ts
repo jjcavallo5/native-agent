@@ -19,6 +19,17 @@ export const startAndroid = async ({ headless }: { headless?: boolean } = {}) =>
 
   const device = lastNameLine.replace(/Name:\s*/, '').trim();
 
+  // Check if an emulator is already running
+  try {
+    const devices = execSync('adb devices').toString();
+    const emulatorRunning = devices.split('\n').some(
+      line => line.includes('emulator') && line.includes('device')
+    );
+    if (emulatorRunning) {
+      return null;
+    }
+  } catch {}
+
   // Launch the emulator with the device
   const args = ['-avd', device];
   if (headless) {
