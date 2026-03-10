@@ -61,11 +61,15 @@ export const getServer = ({driver, port}: {driver: Browser; port: number}) => {
 export const startServer = async ({
 	appiumPort = APPIUM_PORT,
 	serverPort = NATIVE_AGENT_PORT,
+	device = 'android' as 'ios' | 'android',
+	deviceName,
 }: {
 	appiumPort?: number;
 	serverPort?: number;
+	device?: 'ios' | 'android';
+	deviceName?: string;
 }) => {
 	console.log('Starting server...');
-	const driver = await getDriver({port: appiumPort, device: 'android'});
+	const driver = await getDriver({port: appiumPort, device, deviceName});
 	return getServer({driver, port: serverPort});
 };

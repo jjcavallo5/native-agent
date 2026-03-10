@@ -1,7 +1,7 @@
 const SERVER = 'http://localhost:8647';
 
 export const tap = async (options: {x: string; y: string}) => {
-	const sizeRes = await fetch(`${SERVER}/get-size`, {method: 'POST'});
+	const sizeRes = await fetch(`${SERVER}/get-size`, {method: 'GET'});
 	const {width, height} = await sizeRes.json();
 
 	const absX = Math.round(parseFloat(options.x) * width);
