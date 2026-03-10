@@ -1,6 +1,6 @@
 import { execSync, spawn } from 'child_process';
 
-export const startAndroid = async () => {
+export const startAndroid = async ({ headless }: { headless?: boolean } = {}) => {
   const androidHome = process.env.ANDROID_HOME;
   if (!androidHome) {
     throw new Error('ANDROID_HOME environment variable is not set');
@@ -20,9 +20,18 @@ export const startAndroid = async () => {
   const device = lastNameLine.replace(/Name:\s*/, '').trim();
 
   // Launch the emulator with the device
-  const emulator = spawn(`${androidHome}/emulator/emulator`, ['-avd', device], {
+  const args = ['-avd', device];
+  if (headless) {
+    args.push('-no-window');
+  }
+
+  const emulator = spawn(`${androidHome}/emulator/emulator`, args, {
     stdio: 'inherit',
   });
 
   return emulator;
+};
+
+export const stopAndroid = async () => {
+  execSync('adb emu kill', { stdio: 'inherit' });
 };
