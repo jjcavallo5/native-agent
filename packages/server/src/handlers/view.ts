@@ -1,10 +1,10 @@
 import type {Browser} from 'webdriverio';
 import sharp from 'sharp';
 import {writeFile, mkdir} from 'fs/promises';
-import {join} from 'path';
-import type {Response} from 'express';
+import {join, dirname, resolve} from 'path';
+import type {Request, Response} from 'express';
 
-export const view = async ({driver, res}: {driver: Browser; res: Response}) => {
+export const view = async ({driver, req, res}: {driver: Browser; req?: Request; res: Response}) => {
 	try {
 		console.log(`[GET]: /view`);
 		const rawBase64 = await driver.takeScreenshot();
@@ -31,6 +31,15 @@ export const view = async ({driver, res}: {driver: Browser; res: Response}) => {
 		const filepath = join(dir, filename);
 		await writeFile(filepath, buffer);
 
+		let outputPath: string | undefined;
+		const output = req?.query?.output as string | undefined;
+		if (output) {
+			const absPath = resolve(output);
+			await mkdir(dirname(absPath), {recursive: true});
+			await writeFile(absPath, buffer);
+			outputPath = absPath;
+		}
+
 		res.json({
 			success: true,
 			path: filepath,
@@ -38,6 +47,7 @@ export const view = async ({driver, res}: {driver: Browser; res: Response}) => {
 			height,
 			format,
 			sizeBytes: size,
+			...(outputPath && {outputPath}),
 		});
 	} catch (e) {
 		console.error(`[GET]: /view failed`, e);

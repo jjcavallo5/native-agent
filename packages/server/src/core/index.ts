@@ -1,6 +1,7 @@
 import express from 'express';
 import {click} from '@/handlers/click';
 import {getSize} from '@/handlers/get-size';
+import {key} from '@/handlers/key';
 import {open} from '@/handlers/open';
 import {swipe} from '@/handlers/swipe';
 import {tap} from '@/handlers/tap';
@@ -22,6 +23,10 @@ export const getServer = ({driver, port}: {driver: Browser; port: number}) => {
 		await click({driver, req, res});
 	});
 
+	app.post('/key', async (req, res) => {
+		await key({driver, req, res});
+	});
+
 	app.post('/tap', async (req, res) => {
 		await tap({driver, req, res});
 	});
@@ -38,8 +43,8 @@ export const getServer = ({driver, port}: {driver: Browser; port: number}) => {
 		await open({driver, req, res});
 	});
 
-	app.get('/view', async (_req, res) => {
-		await view({driver, res});
+	app.get('/view', async (req, res) => {
+		await view({driver, req, res});
 	});
 
 	app.get('/get-size', async (_req, res) => {

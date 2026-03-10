@@ -26,7 +26,7 @@ export const startAndroid = async ({ headless }: { headless?: boolean } = {}) =>
   }
 
   const emulator = spawn(`${androidHome}/emulator/emulator`, args, {
-    stdio: 'inherit',
+    stdio: headless ? 'ignore' : 'inherit',
   });
 
   return emulator;
