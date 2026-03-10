@@ -1,4 +1,5 @@
 import {remote} from 'webdriverio';
+import {execSync} from 'child_process';
 
 export const getDriver = ({
 	port,
@@ -30,12 +31,26 @@ const getAndroidDriverCapabilities = (deviceName?: string) => {
 	};
 };
 
+const getIosPlatformVersion = (): string | undefined => {
+	try {
+		const output = execSync('xcrun simctl list runtimes ios available -j').toString();
+		const data = JSON.parse(output);
+		const runtimes: {version: string}[] = data.runtimes ?? [];
+		if (runtimes.length === 0) return undefined;
+		return runtimes[runtimes.length - 1].version;
+	} catch {
+		return undefined;
+	}
+};
+
 const getIosDriverCapabilities = (deviceName?: string) => {
+	const platformVersion = getIosPlatformVersion();
 	return {
 		platformName: 'iOS',
 		'appium:automationName': 'XCUITest',
 		'appium:deviceName': deviceName ?? 'iPhone Simulator',
 		'appium:autoLaunch': false,
 		'appium:newCommandTimeout': 0,
+		...(platformVersion && {'appium:platformVersion': platformVersion}),
 	};
 };
