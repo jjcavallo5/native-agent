@@ -1,5 +1,6 @@
 import type {Command} from 'commander';
 import {click} from './click';
+import {key} from './key';
 import {tap} from './tap';
 import {text} from './text';
 import {swipe} from './swipe';
@@ -12,7 +13,14 @@ export const registerActions = (program: Command) => {
 		.command('click')
 		.description('Click on an element by specifying target text')
 		.argument('<element text>', 'Text label of element to click on')
+		.option('--index <n>', 'Zero-based index when multiple elements match (default: 0)')
 		.action(click);
+
+	program
+		.command('key')
+		.description('Press a key (Enter, Back, Home, Tab, etc.)')
+		.argument('<key>', 'Key name to press')
+		.action(key);
 
 	program
 		.command('tap')
@@ -31,10 +39,11 @@ export const registerActions = (program: Command) => {
 		.command('text')
 		.description('Type text into a text input field')
 		.argument('<text>', 'Text to type into input')
-		.requiredOption(
+		.option(
 			'-t, --target <value>',
 			'Text label of element to type into',
 		)
+		.option('--focused', 'Type into the currently focused element')
 		.action(text);
 
 	program
@@ -61,7 +70,8 @@ export const registerActions = (program: Command) => {
 	program
 		.command('view')
 		.description('Get screenshot of the current state')
-		.action(view);
+		.option('-o, --output <path>', 'Save screenshot to custom file path')
+		.action((options) => view(options));
 
 	program
 		.command('get-size')

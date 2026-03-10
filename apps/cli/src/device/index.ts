@@ -13,12 +13,13 @@ deviceCmd
 deviceCmd
 	.command('start')
 	.requiredOption('-p, --platform <platform>', 'Platform to start (e.g. android, ios)')
-	.action(async ({platform}: {platform: string}) => {
+	.option('--headless', 'Run device without GUI window')
+	.action(async ({platform, headless}: {platform: string; headless?: boolean}) => {
 		if (platform === 'android') {
-			await startAndroid();
+			await startAndroid({headless});
 			fs.writeFileSync(STATE_FILE, JSON.stringify({platform}));
 		} else if (platform === 'ios') {
-			const {udid} = await startIos();
+			const {udid} = await startIos({headless});
 			fs.writeFileSync(STATE_FILE, JSON.stringify({platform, udid}));
 		} else {
 			console.error(`Unsupported platform: ${platform}`);

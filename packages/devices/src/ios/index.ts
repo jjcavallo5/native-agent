@@ -21,7 +21,7 @@ export const startIos = async ({ headless }: { headless?: boolean } = {}) => {
     throw new Error('No available iPhone simulator found');
   }
 
-  execSync(`xcrun simctl boot ${found.udid}`, { stdio: 'inherit' });
+  execSync(`xcrun simctl boot ${found.udid}`, { stdio: headless ? 'ignore' : 'inherit' });
 
   if (!headless) {
     spawn('open', ['-a', 'Simulator'], { stdio: 'inherit' });
