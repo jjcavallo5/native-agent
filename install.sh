@@ -290,7 +290,7 @@ check_prerequisites() {
 
       # Check that the iOS Simulator SDK and a matching runtime are installed
       # WebDriverAgent requires both to build and run on simulators
-      IOS_SIM_SDK_VER=$(xcodebuild -showsdks 2>/dev/null | grep iphonesimulator | sed 's/.*iphonesimulator//')
+      IOS_SIM_SDK_VER=$(xcodebuild -showsdks 2>/dev/null | grep iphonesimulator | tail -1 | sed 's/.*iphonesimulator//')
       if [ -z "$IOS_SIM_SDK_VER" ]; then
         warn "Xcode iOS Simulator SDK not installed"
         warn "  Install it with: xcodebuild -downloadPlatform iOS"

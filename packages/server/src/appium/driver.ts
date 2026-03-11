@@ -53,9 +53,9 @@ const getAndroidDriverCapabilities = (deviceName?: string) => {
 
 const getBootedSimulator = (): { udid: string; name: string; platformVersion: string } | undefined => {
 	try {
-		const output = execSync('xcrun simctl list devices booted -j').toString();
+		const output = execSync('xcrun simctl list devices booted -j', {timeout: 10000}).toString();
 		const data = JSON.parse(output);
-		const runtimesOutput = execSync('xcrun simctl list runtimes ios available -j').toString();
+		const runtimesOutput = execSync('xcrun simctl list runtimes ios available -j', {timeout: 10000}).toString();
 		const runtimesData = JSON.parse(runtimesOutput);
 		const runtimeVersionMap: Record<string, string> = {};
 		for (const rt of runtimesData.runtimes ?? []) {

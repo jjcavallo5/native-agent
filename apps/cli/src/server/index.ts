@@ -21,5 +21,5 @@ serverCmd
 
 serverCmd
 	.command('stop')
-	.option('-p, --port <port>', 'Port of server to stop', NATIVE_AGENT_PORT.toString())
+	.option('--port <port>', 'Port of server to stop', NATIVE_AGENT_PORT.toString())
 	.action(stop);
