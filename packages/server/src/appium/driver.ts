@@ -27,11 +27,14 @@ export const getDriver = async ({
 			err.message.includes('WebDriverAgent')
 		)) {
 			console.error(
-				'\nFailed to start WebDriverAgent. This is commonly caused by the iOS platform ' +
-				'not being installed in Xcode.\n\n' +
-				'To fix, run:\n' +
-				'  xcodebuild -downloadPlatform iOS\n\n' +
-				'Or in Xcode: Settings > Components > download the iOS platform.\n'
+				'\nFailed to start WebDriverAgent. This is commonly caused by a mismatch between ' +
+				'the Xcode iOS Simulator SDK version and the installed simulator runtime.\n\n' +
+				'Check your versions:\n' +
+				'  xcodebuild -showsdks | grep iphonesimulator   (SDK version)\n' +
+				'  xcrun simctl list runtimes ios available        (installed runtimes)\n\n' +
+				'The SDK and runtime major versions must match. To install the matching runtime:\n' +
+				'  xcodebuild -downloadPlatform iOS\n' +
+				'  Or in Xcode: Settings > Components > download the matching iOS simulator runtime\n'
 			);
 		}
 		throw err;
