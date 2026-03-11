@@ -13,13 +13,13 @@ serverCmd
 
 serverCmd
 	.command('start')
-	.option('-p, --port <port>', 'Port to run on', NATIVE_AGENT_PORT.toString())
+	.option('--port <port>', 'Port to run on', NATIVE_AGENT_PORT.toString())
 	.option('--headless', 'Run headless mode')
 	.option('--device <device id>', 'Device to run on')
-	.option('--platform <platform>', 'Platform to use', 'android')
+	.option('-p, --platform <platform>', 'Platform to use', 'android')
 	.action(start);
 
 serverCmd
 	.command('stop')
-	.option('-p, --port <port>', 'Port of server to stop', NATIVE_AGENT_PORT.toString())
+	.option('--port <port>', 'Port of server to stop', NATIVE_AGENT_PORT.toString())
 	.action(stop);

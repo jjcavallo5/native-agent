@@ -287,6 +287,30 @@ check_prerequisites() {
   if [ "$PLATFORM" = "macos" ]; then
     if command -v xcodebuild >/dev/null 2>&1; then
       success "Xcode $(xcodebuild -version 2>/dev/null | head -1 || echo 'found')"
+
+      # Check that the iOS Simulator SDK and a matching runtime are installed
+      # WebDriverAgent requires both to build and run on simulators
+      IOS_SIM_SDK_VER=$(xcodebuild -showsdks 2>/dev/null | grep iphonesimulator | tail -1 | sed 's/.*iphonesimulator//')
+      if [ -z "$IOS_SIM_SDK_VER" ]; then
+        warn "Xcode iOS Simulator SDK not installed"
+        warn "  Install it with: xcodebuild -downloadPlatform iOS"
+        warn "  Or in Xcode: Settings > Components > download the iOS platform"
+        WARNINGS=$((WARNINGS + 1))
+      else
+        # Extract major.minor from SDK version (e.g. 26.2 -> 26)
+        SDK_MAJOR=$(printf '%s' "$IOS_SIM_SDK_VER" | cut -d. -f1)
+        # Check if there's a simulator runtime with a matching major version
+        MATCHING_RUNTIME=$(xcrun simctl list runtimes ios available 2>/dev/null | grep "iOS ${SDK_MAJOR}\." || true)
+        if [ -n "$MATCHING_RUNTIME" ]; then
+          success "Xcode iOS Simulator SDK $IOS_SIM_SDK_VER with matching runtime"
+        else
+          warn "Xcode iOS Simulator SDK is $IOS_SIM_SDK_VER but no matching iOS $SDK_MAJOR.x simulator runtime is installed"
+          warn "  xcodebuild cannot target simulators without a matching runtime."
+          warn "  Install the matching runtime with: xcodebuild -downloadPlatform iOS"
+          warn "  Or in Xcode: Settings > Components > download the iOS $SDK_MAJOR simulator runtime"
+          WARNINGS=$((WARNINGS + 1))
+        fi
+      fi
     else
       warn "Xcode not found"
       warn "  iOS testing requires Xcode: https://developer.apple.com/xcode/"

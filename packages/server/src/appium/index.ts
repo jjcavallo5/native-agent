@@ -1,4 +1,6 @@
 import {spawn} from 'child_process';
+import {join} from 'path';
+import {homedir} from 'os';
 import {APPIUM_PORT} from '..';
 
 export {getDriver} from './driver';
@@ -8,6 +10,10 @@ export const startAppium = ({port = APPIUM_PORT}: {port?: number}) => {
 		stdin: 'inherit',
 		stdout: 'pipe',
 		stderr: 'inherit',
+		env: {
+			...process.env,
+			APPIUM_HOME: process.env.APPIUM_HOME ?? join(homedir(), '.appium'),
+		},
 	});
 };
 

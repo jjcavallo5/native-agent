@@ -1,6 +1,7 @@
 import {remote} from 'webdriverio';
+import {execSync} from 'child_process';
 
-export const getDriver = ({
+export const getDriver = async ({
 	port,
 	device,
 	deviceName,
@@ -17,7 +18,27 @@ export const getDriver = ({
 			? getAndroidDriverCapabilities(deviceName)
 			: getIosDriverCapabilities(deviceName),
 	};
-	return remote(webdriverOptions);
+
+	try {
+		return await remote(webdriverOptions);
+	} catch (err) {
+		if (device === 'ios' && err instanceof Error && (
+			err.message.includes('ECONNREFUSED') ||
+			err.message.includes('WebDriverAgent')
+		)) {
+			console.error(
+				'\nFailed to start WebDriverAgent. This is commonly caused by a mismatch between ' +
+				'the Xcode iOS Simulator SDK version and the installed simulator runtime.\n\n' +
+				'Check your versions:\n' +
+				'  xcodebuild -showsdks | grep iphonesimulator   (SDK version)\n' +
+				'  xcrun simctl list runtimes ios available        (installed runtimes)\n\n' +
+				'The SDK and runtime major versions must match. To install the matching runtime:\n' +
+				'  xcodebuild -downloadPlatform iOS\n' +
+				'  Or in Xcode: Settings > Components > download the matching iOS simulator runtime\n'
+			);
+		}
+		throw err;
+	}
 };
 
 const getAndroidDriverCapabilities = (deviceName?: string) => {
@@ -30,12 +51,43 @@ const getAndroidDriverCapabilities = (deviceName?: string) => {
 	};
 };
 
+const getBootedSimulator = (): { udid: string; name: string; platformVersion: string } | undefined => {
+	try {
+		const output = execSync('xcrun simctl list devices booted -j', {timeout: 10000}).toString();
+		const data = JSON.parse(output);
+		const runtimesOutput = execSync('xcrun simctl list runtimes ios available -j', {timeout: 10000}).toString();
+		const runtimesData = JSON.parse(runtimesOutput);
+		const runtimeVersionMap: Record<string, string> = {};
+		for (const rt of runtimesData.runtimes ?? []) {
+			runtimeVersionMap[rt.identifier] = rt.version;
+		}
+		for (const runtime of Object.keys(data.devices)) {
+			for (const device of data.devices[runtime]) {
+				if (device.state === 'Booted') {
+					return {
+						udid: device.udid,
+						name: device.name,
+						platformVersion: runtimeVersionMap[runtime] ?? '',
+					};
+				}
+			}
+		}
+		return undefined;
+	} catch {
+		return undefined;
+	}
+};
+
 const getIosDriverCapabilities = (deviceName?: string) => {
+	const booted = getBootedSimulator();
 	return {
 		platformName: 'iOS',
 		'appium:automationName': 'XCUITest',
-		'appium:deviceName': deviceName ?? 'iPhone Simulator',
+		'appium:deviceName': booted?.name ?? deviceName ?? 'iPhone Simulator',
 		'appium:autoLaunch': false,
 		'appium:newCommandTimeout': 0,
+		'appium:noReset': true,
+		...(booted && {'appium:udid': booted.udid}),
+		...(booted?.platformVersion && {'appium:platformVersion': booted.platformVersion}),
 	};
 };
