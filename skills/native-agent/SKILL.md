@@ -27,7 +27,6 @@ Then use the Read tool on the returned path to view it.
 ### `GET /get-size`
 Returns the actual device viewport dimensions in pixels.
 - Response: `{ width: 1080, height: 2400 }`
-- Use this to understand the device's real resolution for coordinate mapping.
 
 ### `POST /click`
 Clicks an element by its visible text, hint, or content description.
@@ -51,12 +50,13 @@ Taps at a point on the screen using screenshot pixel coordinates.
 - Returns a screenshot after tapping.
 
 ### `POST /swipe`
-Swipes across the screen using normalized coordinates (0.0 to 1.0).
-- Body: `{ "start": { "x": 0.5, "y": 0.7 }, "end": { "x": 0.5, "y": 0.3 } }` — swipes from 70% down to 30% down (scrolls content up).
-- All coordinate values must be between 0.0 and 1.0, representing percentages of screen width/height.
-- Common patterns:
-  - **Scroll down**: `{ "start": { "x": 0.5, "y": 0.7 }, "end": { "x": 0.5, "y": 0.3 } }`
-  - **Scroll up**: `{ "start": { "x": 0.5, "y": 0.3 }, "end": { "x": 0.5, "y": 0.7 } }`
+Swipes across the screen using screenshot pixel coordinates.
+- Body: `{ "start": { "x": 384, "y": 1165 }, "end": { "x": 384, "y": 499 } }` — swipes from lower area to upper area (scrolls content up).
+- `x` and `y` are pixel coordinates from the screenshot image (which is always 768px wide).
+- The server automatically converts screenshot coordinates to device coordinates — no manual conversion needed.
+- Common patterns (for a 768×1664 screenshot):
+  - **Scroll down**: `{ "start": { "x": 384, "y": 1165 }, "end": { "x": 384, "y": 499 } }`
+  - **Scroll up**: `{ "start": { "x": 384, "y": 499 }, "end": { "x": 384, "y": 1165 } }`
 - Returns a screenshot after swiping.
 
 ### `POST /open`
@@ -74,17 +74,17 @@ Presses a device key.
 
 1. **Always screenshot first** with `GET /view` to see what's on screen.
 2. **Prefer `/click` by text** when elements have visible text labels — it's the most reliable.
-4. **Use `/tap` by coordinates** as a fallback for elements where text matching fails (dropdowns, custom widgets, icons). Use the pixel coordinates directly from the screenshot image — no conversion needed.
-5. **Use `/swipe`** to scroll when UI elements are off-screen. Use normalized 0-1 coordinates.
-6. **Check the returned screenshot** after every action — most endpoints return one automatically.
-7. **Chain quick actions** — when you're confident, chain sequential curl calls with `&&`.
+3. **Use `/tap` by coordinates** as a fallback for elements where text matching fails (dropdowns, custom widgets, icons). Use the pixel coordinates directly from the screenshot image — no conversion needed.
+4. **Use `/swipe`** to scroll when UI elements are off-screen. Use screenshot pixel coordinates, same as `/tap`.
+5. **Check the returned screenshot** after every action — most endpoints return one automatically.
+6. **Chain quick actions** — when you're confident, chain sequential curl calls with `&&`.
 
 ## Tips
 
 - Action endpoints return a screenshot automatically, so you can read the returned `path` to verify the action worked without a separate `/view` call.
 - Dropdown menus rendered by React Native often have text that doesn't match XPath selectors. When `/click` fails on a dropdown option, use `/tap` with coordinates instead.
 - If `/click` fails because the element is not found, try scrolling with `/swipe` first — the element may be off-screen.
-- The screenshot is always 768px wide. When using `/tap`, pass the pixel coordinates from the screenshot directly — the server handles the conversion to device coordinates.
+- The screenshot is always 768px wide. When using `/tap` or `/swipe`, pass the pixel coordinates from the screenshot directly — the server handles the conversion to device coordinates.
 - Use `/click` with `index` when there are multiple elements with the same text (e.g., multiple "Add" buttons in a list).
 - Use `/text` with `focused: true` when a field is already focused but hard to identify by text.
 - Use `/key` with `Back` to navigate back, `Home` to go to the home screen, or `Enter` to submit forms.

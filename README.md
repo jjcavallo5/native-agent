@@ -170,21 +170,21 @@ native-agent key Back
 
 #### `native-agent swipe`
 
-Swipe across the screen using normalized coordinates (0.0–1.0). Useful for scrolling.
+Swipe across the screen using screenshot pixel coordinates. Useful for scrolling. Screenshots are always 768px wide — use pixel positions from the screenshot image directly.
 
-| Option     | Description                  |
-| ---------- | ---------------------------- |
-| `--startX` | Starting horizontal position |
-| `--startY` | Starting vertical position   |
-| `--endX`   | Ending horizontal position   |
-| `--endY`   | Ending vertical position     |
+| Option     | Description                                   |
+| ---------- | --------------------------------------------- |
+| `--startX` | Starting X pixel coordinate in screenshot     |
+| `--startY` | Starting Y pixel coordinate in screenshot     |
+| `--endX`   | Ending X pixel coordinate in screenshot       |
+| `--endY`   | Ending Y pixel coordinate in screenshot       |
 
 ```bash
-# Scroll down
-native-agent swipe --startX 0.5 --startY 0.8 --endX 0.5 --endY 0.2
+# Scroll down (on a 768x1664 screenshot)
+native-agent swipe --startX 384 --startY 1165 --endX 384 --endY 499
 
 # Scroll right
-native-agent swipe --startX 0.2 --startY 0.5 --endX 0.8 --endY 0.5
+native-agent swipe --startX 154 --startY 832 --endX 614 --endY 832
 ```
 
 #### `native-agent view`

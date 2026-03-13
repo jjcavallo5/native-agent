@@ -48,22 +48,22 @@ export const registerActions = (program: Command) => {
 
 	program
 		.command('swipe')
-		.description('Swipe the screen for scrolling')
+		.description('Swipe the screen using screenshot pixel coordinates')
 		.requiredOption(
 			'--startX <value>',
-			'X location to start, normalized to device width (0.0 = left side, 1.0 = right side)',
+			'Starting X pixel coordinate in screenshot space',
 		)
 		.requiredOption(
 			'--startY <value>',
-			'Y location to start, normalized to device height (0.0 = top, 1.0 = bottom)',
+			'Starting Y pixel coordinate in screenshot space',
 		)
 		.requiredOption(
 			'--endX <value>',
-			'X location to end, normalized to device width (0.0 = left side, 1.0 = right side)',
+			'Ending X pixel coordinate in screenshot space',
 		)
 		.requiredOption(
 			'--endY <value>',
-			'Y location to end, normalized to device height (0.0 = top, 1.0 = bottom)',
+			'Ending Y pixel coordinate in screenshot space',
 		)
 		.action(swipe);
 
