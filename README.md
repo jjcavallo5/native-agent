@@ -244,7 +244,17 @@ Native Agent is designed to be used as a tool by AI agents. The CLI commands are
 3. Execute an action (`click`, `text`, `swipe`, etc.)
 4. Repeat
 
-A Claude Code skill definition is included in `skills/native-agent/` for direct integration.
+### Agent Skill
+
+This repo includes a [SKILL.md](./skills/native-agent/SKILL.md) that teaches AI agents how to use the native-agent HTTP API. Install it for your agent of choice:
+
+| Agent | Install command |
+| --- | --- |
+| **Claude Code** | `/plugin install github:jjcavallo5/native-agent` |
+| **Codex** | `$skill-installer github:jjcavallo5/native-agent` |
+| **OpenCode** | Automatically discovers skills installed by Claude Code or Codex |
+
+Once installed, start the server (`native-agent server start`) and then ask your agent to interact with the device — the skill provides all the instructions it needs.
 
 ## License
 
