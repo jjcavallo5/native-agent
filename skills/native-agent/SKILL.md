@@ -44,10 +44,10 @@ Types text into an input field.
 - Returns a screenshot after typing.
 
 ### `POST /tap`
-Taps at exact device coordinates.
-- Body: `{ "x": 540, "y": 800 }`
-- Coordinates are in **device pixels** (use `GET /get-size` for dimensions).
-- To convert screenshot coordinates to device coordinates: `device_x = screenshot_x * (device_width / 768)`, `device_y = screenshot_y * (device_height / screenshot_height)`.
+Taps at a point on the screen using screenshot pixel coordinates.
+- Body: `{ "x": 384, "y": 832 }`
+- `x` and `y` are pixel coordinates from the screenshot image (which is always 768px wide).
+- The server automatically converts screenshot coordinates to device coordinates — no manual conversion needed.
 - Returns a screenshot after tapping.
 
 ### `POST /swipe`
@@ -73,9 +73,8 @@ Presses a device key.
 ## Workflow
 
 1. **Always screenshot first** with `GET /view` to see what's on screen.
-2. **Get device size** early with `GET /get-size` so you can map tap coordinates.
-3. **Prefer `/click` by text** when elements have visible text labels — it's the most reliable.
-4. **Use `/tap` by coordinates** as a fallback for elements where text matching fails (dropdowns, custom widgets, icons). Calculate device coordinates from screenshot positions: `device_x = screenshot_x * (device_width / 768)`.
+2. **Prefer `/click` by text** when elements have visible text labels — it's the most reliable.
+4. **Use `/tap` by coordinates** as a fallback for elements where text matching fails (dropdowns, custom widgets, icons). Use the pixel coordinates directly from the screenshot image — no conversion needed.
 5. **Use `/swipe`** to scroll when UI elements are off-screen. Use normalized 0-1 coordinates.
 6. **Check the returned screenshot** after every action — most endpoints return one automatically.
 7. **Chain quick actions** — when you're confident, chain sequential curl calls with `&&`.
@@ -85,7 +84,7 @@ Presses a device key.
 - Action endpoints return a screenshot automatically, so you can read the returned `path` to verify the action worked without a separate `/view` call.
 - Dropdown menus rendered by React Native often have text that doesn't match XPath selectors. When `/click` fails on a dropdown option, use `/tap` with coordinates instead.
 - If `/click` fails because the element is not found, try scrolling with `/swipe` first — the element may be off-screen.
-- The screenshot is always 768px wide. The device is typically larger (e.g., 1080px). Always account for this scale difference when using `/tap`.
+- The screenshot is always 768px wide. When using `/tap`, pass the pixel coordinates from the screenshot directly — the server handles the conversion to device coordinates.
 - Use `/click` with `index` when there are multiple elements with the same text (e.g., multiple "Add" buttons in a list).
 - Use `/text` with `focused: true` when a field is already focused but hard to identify by text.
 - Use `/key` with `Back` to navigate back, `Home` to go to the home screen, or `Enter` to submit forms.

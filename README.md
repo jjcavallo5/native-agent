@@ -131,15 +131,15 @@ native-agent click "Item" --index 2
 
 #### `native-agent tap`
 
-Tap at a specific point on the screen using normalized coordinates (0.0–1.0).
+Tap at a specific point on the screen using screenshot pixel coordinates. Screenshots are always 768px wide — use the pixel position from the screenshot image directly. The server converts to device coordinates automatically.
 
-| Option       | Description                                   |
-| ------------ | --------------------------------------------- |
-| `-x <value>` | Horizontal position (0.0 = left, 1.0 = right) |
-| `-y <value>` | Vertical position (0.0 = top, 1.0 = bottom)   |
+| Option       | Description                                        |
+| ------------ | -------------------------------------------------- |
+| `-x <value>` | X pixel coordinate in screenshot (768px wide)      |
+| `-y <value>` | Y pixel coordinate in screenshot                   |
 
 ```bash
-native-agent tap -x 0.5 -y 0.3
+native-agent tap -x 384 -y 832
 ```
 
 #### `native-agent text <text>`

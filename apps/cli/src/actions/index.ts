@@ -24,14 +24,14 @@ export const registerActions = (program: Command) => {
 
 	program
 		.command('tap')
-		.description('Click on the screen at relative x,y location')
+		.description('Tap the screen at x,y screenshot pixel coordinates')
 		.option(
 			'-x <value>',
-			'X location to click, normalized to device width (0.0 = left side, 1.0 = right side)',
+			'X pixel coordinate in screenshot space (screenshot is 768px wide)',
 		)
 		.option(
 			'-y <value>',
-			'Y location to click, normalized to device height (0.0 = top, 1.0 = bottom)',
+			'Y pixel coordinate in screenshot space',
 		)
 		.action(tap);
 
