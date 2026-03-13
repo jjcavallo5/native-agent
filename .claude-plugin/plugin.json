@@ -1,0 +1,5 @@
+{
+	"name": "native-agent",
+	"description": "Give AI agents the ability to interact with mobile apps on Android and iOS",
+	"version": "0.1.2"
+}

@@ -4,6 +4,8 @@ import {view} from './view';
 import {sleep} from '@/utils';
 import type {Request, Response} from 'express';
 
+const SCREENSHOT_WIDTH = 768;
+
 const TapSchema = z.object({
 	x: z.number(),
 	y: z.number(),
@@ -20,14 +22,24 @@ export const tap = async ({
 }) => {
 	try {
 		const {x, y} = TapSchema.parse(req.body);
-		console.log(`[POST]: /tap   x=${x}, y=${y}`);
+
+		const {width: deviceWidth, height: deviceHeight} =
+			await driver.getWindowSize();
+		const scale = deviceWidth / SCREENSHOT_WIDTH;
+		const deviceX = Math.round(x * scale);
+		const deviceY = Math.round(y * scale);
+
+		console.log(
+			`[POST]: /tap   screenshot=(${x}, ${y})  device=(${deviceX}, ${deviceY})`,
+		);
+
 		await driver.performActions([
 			{
 				type: 'pointer',
 				id: 'finger1',
 				parameters: {pointerType: 'touch'},
 				actions: [
-					{type: 'pointerMove', duration: 0, x, y},
+					{type: 'pointerMove', duration: 0, x: deviceX, y: deviceY},
 					{type: 'pointerDown', button: 0},
 					{type: 'pause', duration: 100},
 					{type: 'pointerUp', button: 0},

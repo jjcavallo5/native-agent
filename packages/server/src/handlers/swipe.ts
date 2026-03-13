@@ -4,9 +4,11 @@ import z from 'zod';
 import {sleep} from '@/utils';
 import type {Request, Response} from 'express';
 
+const SCREENSHOT_WIDTH = 768;
+
 const PointSchema = z.object({
-	x: z.number().lte(1.0).gte(0.0),
-	y: z.number().lte(1.0).gte(0.0),
+	x: z.number(),
+	y: z.number(),
 });
 
 const SwipeSchema = z.object({
@@ -26,7 +28,8 @@ export const swipe = async ({
 	try {
 		const {start, end} = SwipeSchema.parse(req.body);
 		console.log(`[POST]: /swipe   start=(${start.x},${start.y}) end=(${end.x},${end.y})`);
-		const {width, height} = await driver.getWindowSize();
+		const {width: deviceWidth} = await driver.getWindowSize();
+		const scale = deviceWidth / SCREENSHOT_WIDTH;
 
 		await driver.performActions([
 			{
@@ -37,16 +40,16 @@ export const swipe = async ({
 					{
 						type: 'pointerMove',
 						duration: 0,
-						x: Math.floor(width * start.x),
-						y: Math.floor(height * start.y),
+						x: Math.round(start.x * scale),
+						y: Math.round(start.y * scale),
 					},
 					{type: 'pointerDown', button: 0},
 					{type: 'pause', duration: 100},
 					{
 						type: 'pointerMove',
 						duration: 500,
-						x: Math.floor(width * end.x),
-						y: Math.floor(height * end.y),
+						x: Math.round(end.x * scale),
+						y: Math.round(end.y * scale),
 					},
 					{type: 'pointerUp', button: 0},
 				],

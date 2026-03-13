@@ -352,6 +352,11 @@ print_summary() {
   fi
   printf "  Run on Android:  %snative-agent server --platform android%s\n" "$CYAN" "$RESET"
   printf "\n"
+
+  printf "  %sAdd the skill to your AI agent:%s\n" "$BOLD" "$RESET"
+  printf "    Claude Code:   %s/plugin install github:jjcavallo5/native-agent%s\n" "$CYAN" "$RESET"
+  printf "    Codex:         %s\$skill-installer github:jjcavallo5/native-agent%s\n" "$CYAN" "$RESET"
+  printf "\n"
 }
 
 # ---------------------------------------------------------------------------
