@@ -4,8 +4,8 @@ import {
 	waitForAppium,
 	APPIUM_PORT,
 	NATIVE_AGENT_PORT,
-} from '@native-agent/server';
-import {startAndroid, startIos} from '@native-agent/devices';
+} from '@/server-entry';
+import {startAndroid, startIos} from '@/devices';
 import * as fs from 'fs';
 
 const PID_FILE = '/tmp/native-agent-server.pid';

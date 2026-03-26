@@ -1,5 +1,5 @@
 import {Command} from 'commander';
-import {startAndroid, stopAndroid, startIos, stopIos} from '@native-agent/devices';
+import {startAndroid, stopAndroid, startIos, stopIos} from '@/devices';
 import * as fs from 'fs';
 
 const STATE_FILE = '/tmp/native-agent-device.json';

@@ -13,13 +13,12 @@ export default defineConfig({
 	clean: true,
 	splitting: false,
 	banner: {js: '#!/usr/bin/env node'},
-	noExternal: ['@native-agent/server', '@native-agent/devices'],
 	define: {
 		'process.env.VERSION': JSON.stringify(pkg.version),
 	},
 	esbuildOptions(options) {
 		options.alias = {
-			'@': path.resolve(__dirname, '../../packages/server/src'),
+			'@': path.resolve(__dirname, 'src'),
 		};
 	},
 });

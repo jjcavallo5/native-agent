@@ -2,7 +2,7 @@ import {getVersion} from '../lib/utils';
 import {Command} from 'commander';
 import {start} from './start';
 import {stop} from './stop';
-import {NATIVE_AGENT_PORT} from '@native-agent/server';
+import {NATIVE_AGENT_PORT} from '@/server-entry';
 
 export const serverCmd = new Command();
 

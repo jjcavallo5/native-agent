@@ -7,6 +7,7 @@
   },
   "files": ["dist"],
   "scripts": {
+    "dev": "node --import tsx/esm src/index.ts",
     "build": "tsup",
     "prepublishOnly": "npm run build"
   },
@@ -16,6 +17,7 @@
     "webdriverio": "^9.24.0",
     "sharp": "^0.34.5",
     "tree-kill": "^1.2.2",
+    "effect": "^3.21.0",
     "zod": "^4.3.6"
   },
   "optionalDependencies": {
@@ -23,8 +25,6 @@
     "appium-uiautomator2-driver": "^7.0.0"
   },
   "devDependencies": {
-    "@native-agent/devices": "*",
-    "@native-agent/server": "*",
     "@types/express": "^5.0.6",
     "@types/node": "^22.0.0",
     "tsup": "^8.5.0",
