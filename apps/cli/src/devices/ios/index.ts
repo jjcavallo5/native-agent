@@ -1,86 +1,122 @@
-import { execSync, spawn } from 'child_process';
-import { Effect, Schema, Data } from 'effect'
+import {execSync, spawn} from 'child_process';
+import {Effect, Schema, Data, Logger, LogLevel} from 'effect';
 
 const DevicesSchema = Schema.Struct({
-	data: Schema.Record({
+	devices: Schema.Record({
 		key: Schema.String,
-		value: Schema.List(Schema.Struct({
-			dataPath: Schema.String,
-			dataPathSize: Schema.Number,
-			logPath: Schema.String,
-			udid: Schema.String,
-			isAvailable: Schema.Boolean,
-			deviceTypeIdentifier: Schema.String,
-			state: Schema.String,
-			name: Schema.String,
-		}))
-	})
-})
+		value: Schema.List(
+			Schema.Struct({
+				dataPath: Schema.String,
+				dataPathSize: Schema.Number,
+				logPath: Schema.String,
+				udid: Schema.String,
+				isAvailable: Schema.Boolean,
+				deviceTypeIdentifier: Schema.String,
+				state: Schema.String,
+				name: Schema.String,
+			}),
+		),
+	}),
+});
 
 const RuntimesSchema = Schema.Struct({
-	runtimes: Schema.List(Schema.Struct({
-		isAvailable: Schema.Boolean,
-		version: Schema.String,
-		isInternal: Schema.Boolean,
-		buildversion: Schema.String,
-		supportedArchitectures: Schema.List(Schema.String),
-		supportedDeviceTypes: Schema.List(Schema.Struct({
-			bundlePath: Schema.String,
-			name: Schema.String,
+	runtimes: Schema.List(
+		Schema.Struct({
+			isAvailable: Schema.Boolean,
+			version: Schema.String,
+			isInternal: Schema.Boolean,
+			buildversion: Schema.String,
+			supportedArchitectures: Schema.List(Schema.String),
+			supportedDeviceTypes: Schema.List(
+				Schema.Struct({
+					bundlePath: Schema.String,
+					name: Schema.String,
+					identifier: Schema.String,
+					productFamily: Schema.String,
+				}),
+			),
 			identifier: Schema.String,
-			productFamily: Schema.String
-		})),
-		identifier: Schema.String,
-		platform: Schema.String,
-		bundlePath: Schema.String,
-		runtimeRoot: Schema.String,
-		lastUsage: Schema.Record({
-			key: Schema.String,
-			value: Schema.Date,
+			platform: Schema.String,
+			bundlePath: Schema.String,
+			runtimeRoot: Schema.String,
+			lastUsage: Schema.Record({
+				key: Schema.String,
+				value: Schema.Date,
+			}),
+			name: Schema.String,
 		}),
-		name: Schema.String
-	}))
-})
+	),
+});
 
-class DevicesError extends Data.TaggedError('DevicesError')<{ cause: unknown }> { }
-class RuntimesError extends Data.TaggedError('RuntimesError')<{ cause: unknown }> { }
+class DevicesError extends Data.TaggedError('DevicesError')<{cause: unknown}> {}
+class RuntimesError extends Data.TaggedError('RuntimesError')<{
+	cause: unknown;
+}> {}
 
-const getDevices = Effect.gen(function*() {
+const getDevices = Effect.gen(function* () {
 	const output = yield* Effect.try({
-		try: () => JSON.parse(execSync('xcrun simctl list devices available -j').toString()),
-		catch: (cause) => new DevicesError({ cause })
-	})
+		try: () =>
+			JSON.parse(execSync('xcrun simctl list devices available -j').toString()),
+		catch: cause => new DevicesError({cause}),
+	});
+	yield* Effect.logDebug(output);
 	return yield* Schema.decodeUnknown(DevicesSchema)(output);
 });
 
-const getRuntimes = Effect.gen(function*() {
+const getRuntimes = Effect.gen(function* () {
 	const output = yield* Effect.try({
-		try: () => JSON.parse(execSync('xcrun simctl list runtimes ios available -j').toString()),
-		catch: (cause) => new RuntimesError({ cause })
-	})
+		try: () =>
+			JSON.parse(
+				execSync('xcrun simctl list runtimes ios available -j').toString(),
+			),
+		catch: cause => new RuntimesError({cause}),
+	});
+	yield* Effect.logDebug(output);
 	return yield* Schema.decodeUnknown(RuntimesSchema)(output);
 });
 
+export const startIos = async ({headless}: {headless?: boolean} = {}) => {
+	const devices = getDevices.pipe(
+		Logger.withMinimumLogLevel(LogLevel.Warning),
+		Effect.catchTags({
+			ParseError: () =>
+				Effect.logError('No iOS devices registered on this device.'),
+			DevicesError: () =>
+				Effect.logError(
+					'`xcrun simctl` failed. Do you have xcode CLI tools installed?',
+				),
+		}),
+		Effect.runSync,
+	);
 
-export const startIos = async ({ headless }: { headless?: boolean } = {}) => {
-	const devices = Effect.runSync(getDevices);
-	const runtimes = Effect.runSync(getRuntimes);
-	console.log(devices)
-	console.log(runtimes)
-	return
+	const runtimes = getRuntimes.pipe(
+		Logger.withMinimumLogLevel(LogLevel.Warning),
+		Effect.catchTags({
+			ParseError: () =>
+				Effect.logError('No iOS runtimes registered on this device.'),
+			RuntimesError: () =>
+				Effect.logError(
+					'`xcrun simctl` failed. Do you have xcode CLI tools installed?',
+				),
+		}),
+		Effect.runSync,
+	);
+	console.log(devices);
+	console.log(runtimes);
+	return;
 
 	// Get the latest available iOS runtime so we pick a compatible simulator
 	const latestRuntime: string | undefined = runtimesData.runtimes?.length
 		? runtimesData.runtimes[runtimesData.runtimes.length - 1].identifier
 		: undefined;
 
-	let found: { udid: string; name: string; state: string } | null = null;
+	let found: {udid: string; name: string; state: string} | null = null;
 
 	// First, try to find an iPhone on the latest runtime
 	if (latestRuntime && data.devices[latestRuntime]) {
 		for (const device of data.devices[latestRuntime]) {
 			if (device.name.includes('iPhone')) {
-				found = { udid: device.udid, name: device.name, state: device.state };
+				found = {udid: device.udid, name: device.name, state: device.state};
 				break;
 			}
 		}
@@ -92,7 +128,7 @@ export const startIos = async ({ headless }: { headless?: boolean } = {}) => {
 			const devices = data.devices[runtime];
 			for (const device of devices) {
 				if (device.name.includes('iPhone')) {
-					found = { udid: device.udid, name: device.name, state: device.state };
+					found = {udid: device.udid, name: device.name, state: device.state};
 					break;
 				}
 			}
@@ -111,12 +147,12 @@ export const startIos = async ({ headless }: { headless?: boolean } = {}) => {
 	}
 
 	if (!headless) {
-		spawn('open', ['-a', 'Simulator'], { stdio: 'inherit' });
+		spawn('open', ['-a', 'Simulator'], {stdio: 'inherit'});
 	}
 
 	return found;
 };
 
-export const stopIos = async ({ udid }: { udid: string }) => {
-	execSync(`xcrun simctl shutdown ${udid}`, { stdio: 'inherit' });
+export const stopIos = async ({udid}: {udid: string}) => {
+	execSync(`xcrun simctl shutdown ${udid}`, {stdio: 'inherit'});
 };
