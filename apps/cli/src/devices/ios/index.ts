@@ -4,7 +4,7 @@ import {Effect, Schema, Data, Logger, LogLevel} from 'effect';
 const DevicesSchema = Schema.Struct({
 	devices: Schema.Record({
 		key: Schema.String,
-		value: Schema.List(
+		value: Schema.Array(
 			Schema.Struct({
 				dataPath: Schema.String,
 				dataPathSize: Schema.Number,
@@ -20,14 +20,14 @@ const DevicesSchema = Schema.Struct({
 });
 
 const RuntimesSchema = Schema.Struct({
-	runtimes: Schema.List(
+	runtimes: Schema.Array(
 		Schema.Struct({
 			isAvailable: Schema.Boolean,
 			version: Schema.String,
 			isInternal: Schema.Boolean,
 			buildversion: Schema.String,
-			supportedArchitectures: Schema.List(Schema.String),
-			supportedDeviceTypes: Schema.List(
+			supportedArchitectures: Schema.Array(Schema.String),
+			supportedDeviceTypes: Schema.Array(
 				Schema.Struct({
 					bundlePath: Schema.String,
 					name: Schema.String,
@@ -82,19 +82,20 @@ const getRuntimes = () =>
 export const startIosEffect = ({headless}: {headless?: boolean} = {}) =>
 	Effect.gen(function* () {
 		// 1. Get devices & runtimes
-		const devices = yield* getDevices();
-		const runtimes = yield* getRuntimes();
+		const {devices} = yield* getDevices();
+		const {runtimes} = yield* getRuntimes();
 
-		// Get the latest available iOS runtime so we pick a compatible simulator
-		const latestRuntime: string | undefined = runtimesData.runtimes?.length
-			? runtimesData.runtimes[runtimesData.runtimes.length - 1].identifier
-			: undefined;
+		// 2. Get the latest available iOS runtime so we pick a compatible simulator
+		const latestRuntime =
+			runtimes.length > 0
+				? runtimes[runtimes.length - 1]?.identifier
+				: undefined;
 
 		let found: {udid: string; name: string; state: string} | null = null;
 
 		// First, try to find an iPhone on the latest runtime
-		if (latestRuntime && data.devices[latestRuntime]) {
-			for (const device of data.devices[latestRuntime]) {
+		if (latestRuntime && devices[latestRuntime]) {
+			for (const device of devices[latestRuntime]) {
 				if (device.name.includes('iPhone')) {
 					found = {udid: device.udid, name: device.name, state: device.state};
 					break;
@@ -104,9 +105,10 @@ export const startIosEffect = ({headless}: {headless?: boolean} = {}) =>
 
 		// Fallback: any iPhone simulator
 		if (!found) {
-			for (const runtime of Object.keys(data.devices)) {
-				const devices = data.devices[runtime];
-				for (const device of devices) {
+			for (const runtime of Object.keys(devices)) {
+				const matchedDevices = devices[runtime];
+				if (!matchedDevices) continue;
+				for (const device of matchedDevices) {
 					if (device.name.includes('iPhone')) {
 						found = {udid: device.udid, name: device.name, state: device.state};
 						break;
