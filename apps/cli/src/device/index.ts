@@ -1,5 +1,5 @@
 import {Command} from 'commander';
-import {startAndroid, stopAndroid, startIos, stopIos} from '@/devices';
+import {startDeviceAction} from '@/devices';
 import * as fs from 'fs';
 
 const STATE_FILE = '/tmp/native-agent-device.json';
@@ -15,20 +15,7 @@ deviceCmd
 		'Platform to start (e.g. android, ios)',
 	)
 	.option('--headless', 'Run device without GUI window')
-	.action(
-		async ({platform, headless}: {platform: string; headless?: boolean}) => {
-			if (platform === 'android') {
-				await startAndroid({headless});
-				fs.writeFileSync(STATE_FILE, JSON.stringify({platform}));
-			} else if (platform === 'ios') {
-				const {udid} = await startIos({headless});
-				fs.writeFileSync(STATE_FILE, JSON.stringify({platform, udid}));
-			} else {
-				console.error(`Unsupported platform: ${platform}`);
-				process.exit(1);
-			}
-		},
-	);
+	.action(startDeviceAction);
 
 deviceCmd.command('stop').action(async () => {
 	if (!fs.existsSync(STATE_FILE)) {

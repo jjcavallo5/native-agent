@@ -118,7 +118,7 @@ export const startIosEffect = ({headless}: {headless?: boolean} = {}) =>
 		return found;
 	});
 
-export const startIos = async ({headless}: {headless?: boolean} = {}) =>
+export const startIos = ({headless}: {headless?: boolean} = {}) =>
 	startIosEffect({headless}).pipe(
 		Logger.withMinimumLogLevel(LogLevel.Warning),
 		Effect.catchTags({
@@ -133,7 +133,6 @@ export const startIos = async ({headless}: {headless?: boolean} = {}) =>
 					'`xcrun simctl` failed. Do you have xcode CLI tools installed?',
 				),
 		}),
-		Effect.runPromise,
 	);
 
 export const stopIos = async ({udid}: {udid: string}) => {
