@@ -118,23 +118,6 @@ export const startIosEffect = ({headless}: {headless?: boolean} = {}) =>
 		return found;
 	});
 
-export const startIos = ({headless}: {headless?: boolean} = {}) =>
-	startIosEffect({headless}).pipe(
-		Logger.withMinimumLogLevel(LogLevel.Warning),
-		Effect.catchTags({
-			ParseError: () =>
-				Effect.logError('No iOS devices registered on this device.'),
-			DevicesError: () =>
-				Effect.logError(
-					'`xcrun simctl` failed. Do you have xcode CLI tools installed?',
-				),
-			RuntimesError: () =>
-				Effect.logError(
-					'`xcrun simctl` failed. Do you have xcode CLI tools installed?',
-				),
-		}),
-	);
-
 export const stopIos = async ({udid}: {udid: string}) => {
 	execSync(`xcrun simctl shutdown ${udid}`, {stdio: 'inherit'});
 };
