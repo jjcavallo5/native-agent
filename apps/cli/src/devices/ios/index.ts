@@ -86,52 +86,35 @@ export const startIosEffect = ({headless}: {headless?: boolean} = {}) =>
 		const {runtimes} = yield* getRuntimes();
 
 		// 2. Get the latest available iOS runtime so we pick a compatible simulator
-		const latestRuntime =
-			runtimes.length > 0
-				? runtimes[runtimes.length - 1]?.identifier
-				: undefined;
-
-		let found: {udid: string; name: string; state: string} | null = null;
-
-		// First, try to find an iPhone on the latest runtime
-		if (latestRuntime && devices[latestRuntime]) {
-			for (const device of devices[latestRuntime]) {
-				if (device.name.includes('iPhone')) {
-					found = {udid: device.udid, name: device.name, state: device.state};
-					break;
-				}
-			}
+		const latestRuntime = runtimes.at(-1)?.identifier;
+		if (!latestRuntime) {
+			return yield* new RuntimesError({cause: 'No runtimes returned'});
 		}
 
-		// Fallback: any iPhone simulator
-		if (!found) {
-			for (const runtime of Object.keys(devices)) {
-				const matchedDevices = devices[runtime];
-				if (!matchedDevices) continue;
-				for (const device of matchedDevices) {
-					if (device.name.includes('iPhone')) {
-						found = {udid: device.udid, name: device.name, state: device.state};
-						break;
-					}
-				}
-				if (found) break;
-			}
+		// 3. Find devices with matching runtimes
+		const runtimeIds = runtimes.map(r => r.identifier);
+		const matchingDevices = Object.keys(devices)
+			.map(runtime => (runtimeIds.includes(runtime) ? devices[runtime] : null))
+			.filter(d => !!d)
+			.flat();
+
+		// 4. Return device with latest runtime (should be last)
+		const found = matchingDevices.at(-1);
+		if (!found || matchingDevices.length === 0) {
+			return yield* new DevicesError({cause: 'No device/runtime match found'});
 		}
 
-		if (!found) {
-			throw new Error('No available iPhone simulator found');
-		}
-
+		// 5. Boot it
 		if (found.state !== 'Booted') {
 			execSync(`xcrun simctl boot ${found.udid}`, {
 				stdio: headless ? 'ignore' : 'inherit',
 			});
 		}
-
 		if (!headless) {
 			spawn('open', ['-a', 'Simulator'], {stdio: 'inherit'});
 		}
 
+		// 7. Return it
 		return found;
 	});
 
