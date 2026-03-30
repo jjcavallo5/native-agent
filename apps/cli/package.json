@@ -5,19 +5,22 @@
   "bin": {
     "native-agent": "./dist/index.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "node --import tsx/esm src/index.ts",
     "build": "tsup",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "chalk": "^4.1.2",
     "commander": "^14.0.3",
+    "effect": "^3.21.0",
     "express": "^5.2.1",
-    "webdriverio": "^9.24.0",
     "sharp": "^0.34.5",
     "tree-kill": "^1.2.2",
-    "effect": "^3.21.0",
+    "webdriverio": "^9.24.0",
     "zod": "^4.3.6"
   },
   "optionalDependencies": {

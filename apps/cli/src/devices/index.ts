@@ -24,7 +24,7 @@ const writeStateFile = ({platform, udid}: WriteStateFileProps) => {
 
 const startIosAction = async ({headless}: {headless?: boolean}) => {
 	const result = await startIosEffect({headless}).pipe(
-		Logger.withMinimumLogLevel(LogLevel.Warning),
+		Logger.withMinimumLogLevel(LogLevel.Debug),
 		Effect.catchTags({
 			ParseError: () =>
 				Effect.logError('No iOS devices registered on this device.'),
