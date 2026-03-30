@@ -79,6 +79,10 @@ const getRuntimes = () =>
 		return yield* Schema.decodeUnknown(RuntimesSchema)(output);
 	});
 
+const downloadDevices = Effect.gen(function* () {
+	// TODO get okay from user, install devices
+});
+
 export const startIosEffect = ({headless}: {headless?: boolean} = {}) =>
 	Effect.gen(function* () {
 		// 1. Get devices & runtimes

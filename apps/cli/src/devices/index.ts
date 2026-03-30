@@ -30,11 +30,11 @@ const startIosAction = async ({headless}: {headless?: boolean}) => {
 				Effect.logError('No iOS devices registered on this device.'),
 			DevicesError: () =>
 				Effect.logError(
-					'`xcrun simctl` failed. Do you have xcode CLI tools installed?',
+					'No iOS simulators found. Install them in xcode -> settings -> components -> "iOS <version> + simulator"',
 				),
 			RuntimesError: () =>
 				Effect.logError(
-					'`xcrun simctl` failed. Do you have xcode CLI tools installed?',
+					'No iOS runtimes found. Install them in xcode -> settings -> components -> "iOS <version> + simulator"',
 				),
 		}),
 		Effect.provide(CustomLogger),
