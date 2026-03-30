@@ -2,6 +2,7 @@ import {startAndroid, stopAndroid} from './android/index';
 import {startIosEffect, stopIos} from './ios/index';
 import * as fs from 'fs';
 import {Effect, Logger, LogLevel} from 'effect';
+import {CustomLogger} from '@/logger';
 
 const STATE_FILE = '/tmp/native-agent-device.json';
 
@@ -36,6 +37,7 @@ const startIosAction = async ({headless}: {headless?: boolean}) => {
 					'`xcrun simctl` failed. Do you have xcode CLI tools installed?',
 				),
 		}),
+		Effect.provide(CustomLogger),
 		Effect.runPromise,
 	);
 	if (!result) process.exit(1);
