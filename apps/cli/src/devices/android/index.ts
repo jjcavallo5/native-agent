@@ -1,5 +1,37 @@
 import {execSync, spawn} from 'child_process';
-import {Effect} from 'effect';
+import {Effect, Data} from 'effect';
+
+class NoAndroidHome extends Data.TaggedError('NoAndroidHome') {}
+
+const validateAndroidHome = () =>
+	Effect.gen(function* () {
+		const androidHome = process.env.ANDROID_HOME;
+		if (!androidHome) {
+			return yield* new NoAndroidHome();
+		}
+		return androidHome;
+	});
+
+const getDevice = (androidHome: string) =>
+	Effect.gen(function* () {
+		const avdOutput = execSync(
+			`${androidHome}/cmdline-tools/latest/bin/avdmanager list avd`,
+		).toString();
+		const nameLines = avdOutput
+			.split('\n')
+			.filter(line => line.includes('Name'));
+		const lastNameLine = nameLines[nameLines.length - 1];
+		if (!lastNameLine) {
+			throw new Error('No AVD devices found');
+		}
+
+		const device = lastNameLine.replace(/Name:\s*/, '').trim();
+	});
+
+export const startAndroidEffect = Effect.gen(function* () {
+	const androidHome = yield* validateAndroidHome();
+	const device = yield* getDevice(androidHome);
+});
 
 export const startAndroid = async ({headless}: {headless?: boolean} = {}) => {
 	const androidHome = process.env.ANDROID_HOME;
