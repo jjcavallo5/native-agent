@@ -3,6 +3,8 @@ import {Effect, Data} from 'effect';
 
 class NoAndroidHome extends Data.TaggedError('NoAndroidHome') {}
 
+class NoDeviceFound extends Data.TaggedError('NoDeviceFound') {}
+
 const validateAndroidHome = () =>
 	Effect.gen(function* () {
 		const androidHome = process.env.ANDROID_HOME;
@@ -17,19 +19,24 @@ const getDevice = (androidHome: string) =>
 		const avdOutput = execSync(
 			`${androidHome}/cmdline-tools/latest/bin/avdmanager list avd`,
 		).toString();
+
 		const nameLines = avdOutput
 			.split('\n')
 			.filter(line => line.includes('Name'));
+
 		const lastNameLine = nameLines[nameLines.length - 1];
 		if (!lastNameLine) {
-			throw new Error('No AVD devices found');
+			return yield* new NoDeviceFound();
 		}
 
-		const device = lastNameLine.replace(/Name:\s*/, '').trim();
+		return lastNameLine.replace(/Name:\s*/, '').trim();
 	});
 
 export const startAndroidEffect = Effect.gen(function* () {
+	// 1. Validate android home
 	const androidHome = yield* validateAndroidHome();
+
+	// 2. Get device
 	const device = yield* getDevice(androidHome);
 });
 
