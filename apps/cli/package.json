@@ -39,6 +39,6 @@
     "directory": "apps/cli"
   },
   "engines": {
-    "node": ">=18.19"
+    "node": ">=20"
   }
 }

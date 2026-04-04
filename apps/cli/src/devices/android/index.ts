@@ -161,9 +161,11 @@ export const startAndroidEffect = ({headless}: {headless?: boolean} = {}) =>
 			args.push('-no-window');
 		}
 
-		spawn(`${androidHome}/emulator/emulator`, args, {
+		const child = spawn(`${androidHome}/emulator/emulator`, args, {
 			stdio: headless ? 'ignore' : 'inherit',
+			detached: true,
 		});
+		child.unref();
 
 		return device;
 	});
