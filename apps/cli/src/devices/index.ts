@@ -90,10 +90,16 @@ export const stopDeviceAction = async () => {
 		process.exit(1);
 	}
 
-	const state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8'));
+	let state: {platform: string; udid: string};
+	try {
+		state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8'));
+	} catch (e) {
+		console.error(`Failed to parse device state file: ${e}`);
+		process.exit(1);
+	}
 
 	if (state.platform === 'android') {
-		await stopAndroid();
+		await stopAndroid({udid: state.udid});
 	} else if (state.platform === 'ios') {
 		await stopIos({udid: state.udid});
 	} else {

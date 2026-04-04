@@ -1,4 +1,4 @@
-import {execSync, spawn} from 'child_process';
+import {execFileSync, execSync, spawn} from 'child_process';
 import {arch} from 'os';
 import {Effect, Data} from 'effect';
 import {confirmPrompt} from '../prompt';
@@ -26,10 +26,11 @@ const getDevice = (androidHome: string) =>
 	Effect.gen(function* () {
 		const avdOutput = yield* Effect.try({
 			try: () =>
-				execSync(
-					`${androidHome}/cmdline-tools/latest/bin/avdmanager list avd`,
+				execFileSync(
+					`${androidHome}/cmdline-tools/latest/bin/avdmanager`,
+					['list', 'avd'],
 				).toString(),
-			catch: cause => new NoDeviceFound(),
+			catch: cause => new SetupError({cause}),
 		});
 
 		const nameLines = avdOutput
@@ -65,8 +66,9 @@ const findLatestSystemImage = (androidHome: string) =>
 	Effect.gen(function* () {
 		const output = yield* Effect.try({
 			try: () =>
-				execSync(
-					`${androidHome}/cmdline-tools/latest/bin/sdkmanager --list`,
+				execFileSync(
+					`${androidHome}/cmdline-tools/latest/bin/sdkmanager`,
+					['--list'],
 				).toString(),
 			catch: cause => new SetupError({cause}),
 		});
@@ -106,8 +108,9 @@ const downloadSystemImage = (androidHome: string, imageId: string) =>
 
 		yield* Effect.try({
 			try: () =>
-				execSync(
-					`${androidHome}/cmdline-tools/latest/bin/sdkmanager "${imageId}"`,
+				execFileSync(
+					`${androidHome}/cmdline-tools/latest/bin/sdkmanager`,
+					[imageId],
 					{stdio: 'inherit'},
 				),
 			catch: cause => new SetupError({cause}),
@@ -121,8 +124,9 @@ const createAvd = (androidHome: string, imageId: string) =>
 
 		yield* Effect.try({
 			try: () =>
-				execSync(
-					`${androidHome}/cmdline-tools/latest/bin/avdmanager create avd -n ${name} -k "${imageId}" --device "pixel"`,
+				execFileSync(
+					`${androidHome}/cmdline-tools/latest/bin/avdmanager`,
+					['create', 'avd', '-n', name, '-k', imageId, '--device', 'pixel'],
 					{stdio: 'inherit'},
 				),
 			catch: cause => new SetupError({cause}),
@@ -164,6 +168,6 @@ export const startAndroidEffect = ({headless}: {headless?: boolean} = {}) =>
 		return device;
 	});
 
-export const stopAndroid = async () => {
-	execSync('adb emu kill', {stdio: 'inherit'});
+export const stopAndroid = async ({udid}: {udid: string}) => {
+	execFileSync('adb', ['-s', udid, 'emu', 'kill'], {stdio: 'inherit'});
 };

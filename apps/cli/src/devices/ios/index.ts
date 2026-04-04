@@ -1,4 +1,4 @@
-import {execSync, spawn} from 'child_process';
+import {execSync, execFileSync, spawn} from 'child_process';
 import {Effect, Schema, Data} from 'effect';
 import {confirmPrompt} from '../prompt';
 
@@ -138,9 +138,13 @@ const createSimulator = (runtimeId: string) =>
 
 		yield* Effect.try({
 			try: () =>
-				execSync(
-					`xcrun simctl create "${latestIPhone.name}" ${latestIPhone.identifier} ${runtimeId}`,
-				),
+				execFileSync('xcrun', [
+					'simctl',
+					'create',
+					latestIPhone.name,
+					latestIPhone.identifier,
+					runtimeId,
+				]),
 			catch: cause => new SetupError({cause}),
 		});
 
@@ -184,8 +188,12 @@ export const startIosEffect = ({headless}: {headless?: boolean} = {}) =>
 
 		// 5. Boot it
 		if (found.state !== 'Booted') {
-			execSync(`xcrun simctl boot ${found.udid}`, {
-				stdio: headless ? 'ignore' : 'inherit',
+			yield* Effect.try({
+				try: () =>
+					execFileSync('xcrun', ['simctl', 'boot', found.udid], {
+						stdio: headless ? 'ignore' : 'inherit',
+					}),
+				catch: cause => new SetupError({cause}),
 			});
 		}
 		if (!headless) {
@@ -196,5 +204,5 @@ export const startIosEffect = ({headless}: {headless?: boolean} = {}) =>
 	});
 
 export const stopIos = async ({udid}: {udid: string}) => {
-	execSync(`xcrun simctl shutdown ${udid}`, {stdio: 'inherit'});
+	execFileSync('xcrun', ['simctl', 'shutdown', udid], {stdio: 'inherit'});
 };

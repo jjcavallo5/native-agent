@@ -1,7 +1,7 @@
 import {spawn} from 'child_process';
 import {join} from 'path';
 import {homedir} from 'os';
-import {APPIUM_PORT} from '@/server-entry';
+import {APPIUM_PORT} from '@/constants';
 
 export {getDriver} from './driver';
 

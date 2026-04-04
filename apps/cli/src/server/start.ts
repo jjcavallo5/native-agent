@@ -11,12 +11,10 @@ const PID_FILE = '/tmp/native-agent-server.pid';
 
 export const start = async ({
 	port,
-	headless,
 	device,
 	platform = 'android',
 }: {
 	port?: string;
-	headless?: boolean;
 	device?: string;
 	platform?: string;
 }) => {

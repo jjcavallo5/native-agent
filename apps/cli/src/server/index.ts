@@ -14,7 +14,6 @@ serverCmd
 serverCmd
 	.command('start')
 	.option('--port <port>', 'Port to run on', NATIVE_AGENT_PORT.toString())
-	.option('--headless', 'Run headless mode')
 	.option('--device <device id>', 'Device to run on')
 	.option('-p, --platform <platform>', 'Platform to use', 'android')
 	.action(start);
