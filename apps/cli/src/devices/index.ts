@@ -1,4 +1,4 @@
-import {startAndroid, stopAndroid} from './android/index';
+import {startAndroidEffect, stopAndroid} from './android/index';
 import {startIosEffect, stopIos} from './ios/index';
 import * as fs from 'fs';
 import {Effect, Logger, LogLevel} from 'effect';
@@ -20,6 +20,28 @@ type WriteStateFileProps = {
 
 const writeStateFile = ({platform, udid}: WriteStateFileProps) => {
 	fs.writeFileSync(STATE_FILE, JSON.stringify({platform, udid}));
+};
+
+const startAndroidAction = async ({headless}: {headless?: boolean}) => {
+	const result = await startAndroidEffect({headless}).pipe(
+		Logger.withMinimumLogLevel(LogLevel.Debug),
+		Effect.catchTags({
+			NoAndroidHome: () =>
+				Effect.logError(
+					'ANDROID_HOME environment variable is not set.',
+				),
+			NoDeviceFound: () =>
+				Effect.logError(
+					'No AVD devices found. Create one in Android Studio -> Virtual Device Manager.',
+				),
+			EmulatorAlreadyRunning: () =>
+				Effect.logError('An emulator is already running.'),
+		}),
+		Effect.provide(CustomLogger),
+		Effect.runPromise,
+	);
+	if (!result) process.exit(1);
+	writeStateFile({platform: 'android', udid: result});
 };
 
 const startIosAction = async ({headless}: {headless?: boolean}) => {
@@ -49,8 +71,7 @@ export const startDeviceAction = async ({
 	headless,
 }: StartDeviceProps) => {
 	if (platform === 'android') {
-		await startAndroid({headless});
-		fs.writeFileSync(STATE_FILE, JSON.stringify({platform}));
+		await startAndroidAction({headless});
 	} else if (platform === 'ios') {
 		await startIosAction({headless});
 	} else {

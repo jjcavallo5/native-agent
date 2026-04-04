@@ -5,6 +5,10 @@ class NoAndroidHome extends Data.TaggedError('NoAndroidHome') {}
 
 class NoDeviceFound extends Data.TaggedError('NoDeviceFound') {}
 
+class EmulatorAlreadyRunning extends Data.TaggedError(
+	'EmulatorAlreadyRunning',
+) {}
+
 const validateAndroidHome = () =>
 	Effect.gen(function* () {
 		const androidHome = process.env.ANDROID_HOME;
@@ -16,9 +20,13 @@ const validateAndroidHome = () =>
 
 const getDevice = (androidHome: string) =>
 	Effect.gen(function* () {
-		const avdOutput = execSync(
-			`${androidHome}/cmdline-tools/latest/bin/avdmanager list avd`,
-		).toString();
+		const avdOutput = yield* Effect.try({
+			try: () =>
+				execSync(
+					`${androidHome}/cmdline-tools/latest/bin/avdmanager list avd`,
+				).toString(),
+			catch: cause => new NoDeviceFound(),
+		});
 
 		const nameLines = avdOutput
 			.split('\n')
@@ -32,56 +40,43 @@ const getDevice = (androidHome: string) =>
 		return lastNameLine.replace(/Name:\s*/, '').trim();
 	});
 
-export const startAndroidEffect = Effect.gen(function* () {
-	// 1. Validate android home
-	const androidHome = yield* validateAndroidHome();
-
-	// 2. Get device
-	const device = yield* getDevice(androidHome);
-});
-
-export const startAndroid = async ({headless}: {headless?: boolean} = {}) => {
-	const androidHome = process.env.ANDROID_HOME;
-	if (!androidHome) {
-		throw new Error('ANDROID_HOME environment variable is not set');
-	}
-
-	// Get the latest AVD device name
-	const avdOutput = execSync(
-		`${androidHome}/cmdline-tools/latest/bin/avdmanager list avd`,
-	).toString();
-
-	const nameLines = avdOutput.split('\n').filter(line => line.includes('Name'));
-	const lastNameLine = nameLines[nameLines.length - 1];
-	if (!lastNameLine) {
-		throw new Error('No AVD devices found');
-	}
-
-	const device = lastNameLine.replace(/Name:\s*/, '').trim();
-
-	// Check if an emulator is already running
-	try {
-		const devices = execSync('adb devices').toString();
+const checkEmulatorRunning = () =>
+	Effect.gen(function* () {
+		const devices = yield* Effect.try({
+			try: () => execSync('adb devices').toString(),
+			catch: () => '',
+		});
 		const emulatorRunning = devices
 			.split('\n')
 			.some(line => line.includes('emulator') && line.includes('device'));
 		if (emulatorRunning) {
-			return null;
+			return yield* new EmulatorAlreadyRunning();
 		}
-	} catch {}
-
-	// Launch the emulator with the device
-	const args = ['-avd', device];
-	if (headless) {
-		args.push('-no-window');
-	}
-
-	const emulator = spawn(`${androidHome}/emulator/emulator`, args, {
-		stdio: headless ? 'ignore' : 'inherit',
 	});
 
-	return emulator;
-};
+export const startAndroidEffect = ({headless}: {headless?: boolean} = {}) =>
+	Effect.gen(function* () {
+		// 1. Validate android home
+		const androidHome = yield* validateAndroidHome();
+
+		// 2. Get device
+		const device = yield* getDevice(androidHome);
+
+		// 3. Check if an emulator is already running
+		yield* checkEmulatorRunning();
+
+		// 4. Launch the emulator
+		const args = ['-avd', device];
+		if (headless) {
+			args.push('-no-window');
+		}
+
+		spawn(`${androidHome}/emulator/emulator`, args, {
+			stdio: headless ? 'ignore' : 'inherit',
+		});
+
+		return device;
+	});
 
 export const stopAndroid = async () => {
 	execSync('adb emu kill', {stdio: 'inherit'});
