@@ -4,22 +4,32 @@ import * as fs from 'fs';
 import {Effect, Logger, LogLevel} from 'effect';
 import {CustomLogger} from '@/logger';
 
-const STATE_FILE = '/tmp/native-agent-device.json';
+const STATE_FILE = '/tmp/native-agent-devices.json';
 
 type Platform = 'ios' | 'android';
+
+type DeviceEntry = {
+	platform: Platform;
+	udid: string;
+};
 
 type StartDeviceProps = {
 	platform: Platform;
 	headless?: boolean;
 };
 
-type WriteStateFileProps = {
-	platform: Platform;
-	udid: string;
+const readStateFile = (): DeviceEntry[] => {
+	try {
+		return JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8'));
+	} catch {
+		return [];
+	}
 };
 
-const writeStateFile = ({platform, udid}: WriteStateFileProps) => {
-	fs.writeFileSync(STATE_FILE, JSON.stringify({platform, udid}));
+const addDeviceToState = ({platform, udid}: DeviceEntry) => {
+	const devices = readStateFile().filter(d => d.udid !== udid);
+	devices.push({platform, udid});
+	fs.writeFileSync(STATE_FILE, JSON.stringify(devices));
 };
 
 const startAndroidAction = async ({headless}: {headless?: boolean}) => {
@@ -43,7 +53,7 @@ const startAndroidAction = async ({headless}: {headless?: boolean}) => {
 		Effect.runPromise,
 	);
 	if (!result) process.exit(1);
-	writeStateFile({platform: 'android', udid: result});
+	addDeviceToState({platform: 'android', udid: result});
 };
 
 const startIosAction = async ({headless}: {headless?: boolean}) => {
@@ -67,7 +77,7 @@ const startIosAction = async ({headless}: {headless?: boolean}) => {
 		Effect.runPromise,
 	);
 	if (!result) process.exit(1);
-	writeStateFile({platform: 'ios', udid: result.udid});
+	addDeviceToState({platform: 'ios', udid: result.udid});
 };
 
 export const startDeviceAction = async ({
@@ -85,28 +95,23 @@ export const startDeviceAction = async ({
 };
 
 export const stopDeviceAction = async () => {
-	if (!fs.existsSync(STATE_FILE)) {
+	const devices = readStateFile();
+	if (devices.length === 0) {
 		console.error('No device state found. Is a device running?');
 		process.exit(1);
 	}
 
-	let state: {platform: string; udid: string};
-	try {
-		state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8'));
-	} catch (e) {
-		console.error(`Failed to parse device state file: ${e}`);
-		process.exit(1);
-	}
-
-	if (state.platform === 'android') {
-		await stopAndroid({udid: state.udid});
-	} else if (state.platform === 'ios') {
-		await stopIos({udid: state.udid});
-	} else {
-		console.error(`Unknown platform in state: ${state.platform}`);
-		process.exit(1);
+	for (const device of devices) {
+		if (device.platform === 'android') {
+			await stopAndroid({udid: device.udid});
+		} else if (device.platform === 'ios') {
+			await stopIos({udid: device.udid});
+		} else {
+			console.error(`Unknown platform in state: ${device.platform}`);
+			continue;
+		}
+		console.log(`Stopped ${device.platform} device (${device.udid})`);
 	}
 
 	fs.unlinkSync(STATE_FILE);
-	console.log(`Stopped ${state.platform} device`);
 };
