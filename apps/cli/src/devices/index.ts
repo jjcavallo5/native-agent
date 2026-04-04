@@ -20,9 +20,16 @@ type StartDeviceProps = {
 
 const readStateFile = (): DeviceEntry[] => {
 	try {
-		return JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8'));
-	} catch {
-		return [];
+		const parsed = JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8'));
+		if (!Array.isArray(parsed)) {
+			throw new Error(`Invalid device state format in ${STATE_FILE}`);
+		}
+		return parsed;
+	} catch (error) {
+		if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+			return [];
+		}
+		throw error;
 	}
 };
 
