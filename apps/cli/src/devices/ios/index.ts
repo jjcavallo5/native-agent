@@ -1,5 +1,6 @@
 import {execSync, spawn} from 'child_process';
-import {Effect, Schema, Data, Logger, LogLevel} from 'effect';
+import {Effect, Schema, Data} from 'effect';
+import {confirmPrompt} from '../prompt';
 
 const DevicesSchema = Schema.Struct({
 	devices: Schema.Record({
@@ -52,6 +53,7 @@ class DevicesError extends Data.TaggedError('DevicesError')<{cause: unknown}> {}
 class RuntimesError extends Data.TaggedError('RuntimesError')<{
 	cause: unknown;
 }> {}
+class SetupError extends Data.TaggedError('SetupError')<{cause: unknown}> {}
 
 const getDevices = () =>
 	Effect.gen(function* () {
@@ -79,17 +81,89 @@ const getRuntimes = () =>
 		return yield* Schema.decodeUnknown(RuntimesSchema)(output);
 	});
 
-const downloadDevices = Effect.gen(function* () {
-	// TODO get okay from user, install devices
+const DeviceTypesSchema = Schema.Struct({
+	devicetypes: Schema.Array(
+		Schema.Struct({
+			name: Schema.String,
+			identifier: Schema.String,
+		}),
+	),
 });
+
+const getDeviceTypes = () =>
+	Effect.gen(function* () {
+		const output = yield* Effect.try({
+			try: () =>
+				JSON.parse(
+					execSync('xcrun simctl list devicetypes -j').toString(),
+				),
+			catch: cause => new SetupError({cause}),
+		});
+		return yield* Schema.decodeUnknown(DeviceTypesSchema)(output);
+	});
+
+const downloadRuntime = () =>
+	Effect.gen(function* () {
+		const confirmed = yield* confirmPrompt(
+			'No iOS simulator runtimes found. Download the latest iOS runtime?',
+		);
+		if (!confirmed) {
+			return yield* new RuntimesError({cause: 'User declined runtime download'});
+		}
+
+		yield* Effect.try({
+			try: () =>
+				execSync('xcodebuild -downloadPlatform iOS', {stdio: 'inherit'}),
+			catch: cause => new SetupError({cause}),
+		});
+
+		return yield* getRuntimes();
+	});
+
+const createSimulator = (runtimeId: string) =>
+	Effect.gen(function* () {
+		const {devicetypes} = yield* getDeviceTypes();
+		const iPhoneTypes = devicetypes.filter(d => d.name.includes('iPhone'));
+		const latestIPhone = iPhoneTypes.at(-1);
+		if (!latestIPhone) {
+			return yield* new SetupError({cause: 'No iPhone device types found'});
+		}
+
+		const confirmed = yield* confirmPrompt(
+			`No simulators match available runtimes. Create "${latestIPhone.name}"?`,
+		);
+		if (!confirmed) {
+			return yield* new DevicesError({cause: 'User declined simulator creation'});
+		}
+
+		yield* Effect.try({
+			try: () =>
+				execSync(
+					`xcrun simctl create "${latestIPhone.name}" ${latestIPhone.identifier} ${runtimeId}`,
+				),
+			catch: cause => new SetupError({cause}),
+		});
+
+		const {devices} = yield* getDevices();
+		const runtimeDevices = devices[runtimeId];
+		const created = runtimeDevices?.at(-1);
+		if (!created) {
+			return yield* new SetupError({cause: 'Simulator was created but could not be found'});
+		}
+		return created;
+	});
 
 export const startIosEffect = ({headless}: {headless?: boolean} = {}) =>
 	Effect.gen(function* () {
 		// 1. Get devices & runtimes
 		const {devices} = yield* getDevices();
-		const {runtimes} = yield* getRuntimes();
+		let {runtimes} = yield* getRuntimes();
 
-		// 2. Get the latest available iOS runtime so we pick a compatible simulator
+		// 2. If no runtimes, offer to download
+		if (runtimes.length === 0) {
+			({runtimes} = yield* downloadRuntime());
+		}
+
 		const latestRuntime = runtimes.at(-1)?.identifier;
 		if (!latestRuntime) {
 			return yield* new RuntimesError({cause: 'No runtimes returned'});
@@ -102,10 +176,10 @@ export const startIosEffect = ({headless}: {headless?: boolean} = {}) =>
 			.filter(d => !!d)
 			.flat();
 
-		// 4. Return device with latest runtime (should be last)
-		const found = matchingDevices.at(-1);
+		// 4. If no matching devices, offer to create one
+		let found = matchingDevices.at(-1);
 		if (!found || matchingDevices.length === 0) {
-			return yield* new DevicesError({cause: 'No device/runtime match found'});
+			found = yield* createSimulator(latestRuntime);
 		}
 
 		// 5. Boot it
@@ -118,7 +192,6 @@ export const startIosEffect = ({headless}: {headless?: boolean} = {}) =>
 			spawn('open', ['-a', 'Simulator'], {stdio: 'inherit'});
 		}
 
-		// 7. Return it
 		return found;
 	});
 

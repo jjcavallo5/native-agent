@@ -32,10 +32,12 @@ const startAndroidAction = async ({headless}: {headless?: boolean}) => {
 				),
 			NoDeviceFound: () =>
 				Effect.logError(
-					'No AVD devices found. Create one in Android Studio -> Virtual Device Manager.',
+					'No AVD devices found and setup was declined or failed.',
 				),
 			EmulatorAlreadyRunning: () =>
 				Effect.logError('An emulator is already running.'),
+			SetupError: e =>
+				Effect.logError(`Android setup failed: ${e.cause}`),
 		}),
 		Effect.provide(CustomLogger),
 		Effect.runPromise,
@@ -52,12 +54,14 @@ const startIosAction = async ({headless}: {headless?: boolean}) => {
 				Effect.logError('No iOS devices registered on this device.'),
 			DevicesError: () =>
 				Effect.logError(
-					'No iOS simulators found. Install them in xcode -> settings -> components -> "iOS <version> + simulator"',
+					'No iOS simulators found and setup was declined or failed.',
 				),
 			RuntimesError: () =>
 				Effect.logError(
-					'No iOS runtimes found. Install them in xcode -> settings -> components -> "iOS <version> + simulator"',
+					'No iOS runtimes found and setup was declined or failed.',
 				),
+			SetupError: e =>
+				Effect.logError(`iOS setup failed: ${e.cause}`),
 		}),
 		Effect.provide(CustomLogger),
 		Effect.runPromise,
