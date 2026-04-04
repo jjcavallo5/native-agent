@@ -22,7 +22,7 @@ const logger = Logger.make(({logLevel, message}) => {
 			globalThis.console.log(chalk.yellowBright(logTag), msg);
 			break;
 		case 'ERROR':
-			globalThis.console.log(chalk.redBright(logTag), msg);
+			globalThis.console.error(chalk.redBright(logTag), msg);
 			break;
 		case 'FATAL':
 			globalThis.console.log(chalk.bgRedBright(logTag), msg);
