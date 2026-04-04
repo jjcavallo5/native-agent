@@ -9,7 +9,7 @@ import {view} from '@/handlers/view';
 import {text} from '@/handlers/text';
 import {type Browser} from 'webdriverio';
 import {getDriver} from '@/appium';
-import {NATIVE_AGENT_PORT, APPIUM_PORT} from '..';
+import {NATIVE_AGENT_PORT, APPIUM_PORT} from '@/constants';
 
 export const getServer = ({driver, port}: {driver: Browser; port: number}) => {
 	const app = express();

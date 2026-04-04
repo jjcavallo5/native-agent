@@ -2,7 +2,7 @@ import {getVersion} from '../lib/utils';
 import {Command} from 'commander';
 import {start} from './start';
 import {stop} from './stop';
-import {NATIVE_AGENT_PORT} from '@native-agent/server';
+import {NATIVE_AGENT_PORT} from '@/server-entry';
 
 export const serverCmd = new Command();
 
@@ -14,7 +14,6 @@ serverCmd
 serverCmd
 	.command('start')
 	.option('--port <port>', 'Port to run on', NATIVE_AGENT_PORT.toString())
-	.option('--headless', 'Run headless mode')
 	.option('--device <device id>', 'Device to run on')
 	.option('-p, --platform <platform>', 'Platform to use', 'android')
 	.action(start);

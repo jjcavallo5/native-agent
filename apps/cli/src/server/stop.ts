@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import {execSync} from 'child_process';
-import {NATIVE_AGENT_PORT} from '@native-agent/server';
+import {NATIVE_AGENT_PORT} from '@/server-entry';
 
 const PID_FILE = '/tmp/native-agent-server.pid';
 
