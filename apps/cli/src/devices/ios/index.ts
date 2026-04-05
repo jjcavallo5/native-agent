@@ -81,26 +81,6 @@ const getRuntimes = () =>
 		return yield* Schema.decodeUnknown(RuntimesSchema)(output);
 	});
 
-const DeviceTypesSchema = Schema.Struct({
-	devicetypes: Schema.Array(
-		Schema.Struct({
-			name: Schema.String,
-			identifier: Schema.String,
-		}),
-	),
-});
-
-const getDeviceTypes = () =>
-	Effect.gen(function* () {
-		const output = yield* Effect.try({
-			try: () =>
-				JSON.parse(
-					execSync('xcrun simctl list devicetypes -j').toString(),
-				),
-			catch: cause => new SetupError({cause}),
-		});
-		return yield* Schema.decodeUnknown(DeviceTypesSchema)(output);
-	});
 
 const downloadRuntime = () =>
 	Effect.gen(function* () {
@@ -120,11 +100,14 @@ const downloadRuntime = () =>
 		return yield* getRuntimes();
 	});
 
-const createSimulator = (runtimeId: string) =>
+const createSimulator = (runtimeId: string, runtimes: typeof RuntimesSchema.Type.runtimes) =>
 	Effect.gen(function* () {
-		const {devicetypes} = yield* getDeviceTypes();
-		const iPhoneTypes = devicetypes.filter(d => d.name.includes('iPhone'));
-		const latestIPhone = iPhoneTypes.at(-1);
+		const runtime = runtimes.find(r => r.identifier === runtimeId);
+		if (!runtime) {
+			return yield* new SetupError({cause: 'Runtime not found'});
+		}
+		const iPhoneTypes = runtime.supportedDeviceTypes.filter(d => d.productFamily === 'iPhone');
+		const latestIPhone = iPhoneTypes.at(0);
 		if (!latestIPhone) {
 			return yield* new SetupError({cause: 'No iPhone device types found'});
 		}
@@ -173,17 +156,25 @@ export const startIosEffect = ({headless}: {headless?: boolean} = {}) =>
 			return yield* new RuntimesError({cause: 'No runtimes returned'});
 		}
 
-		// 3. Find devices with matching runtimes
+		// 3. Find iPhone devices with matching runtimes
+		const iPhoneTypeIds = new Set(
+			runtimes.flatMap(r =>
+				r.supportedDeviceTypes
+					.filter(d => d.productFamily === 'iPhone')
+					.map(d => d.identifier),
+			),
+		);
 		const runtimeIds = runtimes.map(r => r.identifier);
 		const matchingDevices = Object.keys(devices)
 			.map(runtime => (runtimeIds.includes(runtime) ? devices[runtime] : null))
 			.filter(d => !!d)
-			.flat();
+			.flat()
+			.filter(d => iPhoneTypeIds.has(d.deviceTypeIdentifier));
 
 		// 4. If no matching devices, offer to create one
 		let found = matchingDevices.at(-1);
 		if (!found || matchingDevices.length === 0) {
-			found = yield* createSimulator(latestRuntime);
+			found = yield* createSimulator(latestRuntime, runtimes);
 		}
 
 		// 5. Boot it
