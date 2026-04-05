@@ -1,4 +1,4 @@
-import {execSync, execFileSync} from 'child_process';
+import {execFileSync, execSync} from 'child_process';
 import {Effect, Schema, Data} from 'effect';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -80,7 +80,7 @@ const downloadArtifact = (buildUrl: string, tempDir: string) =>
 		const tarPath = path.join(tempDir, 'build.tar.gz');
 		yield* Effect.try({
 			try: () =>
-				execSync(`curl -L -o "${tarPath}" "${buildUrl}"`, {
+				execFileSync('curl', ['-L', '-o', tarPath, buildUrl], {
 					stdio: 'inherit',
 				}),
 			catch: cause => new DownloadError({cause}),
@@ -92,7 +92,7 @@ const extractApp = (tarPath: string, tempDir: string) =>
 	Effect.gen(function* () {
 		yield* Effect.try({
 			try: () =>
-				execSync(`tar -xzf "${tarPath}" -C "${tempDir}"`, {
+				execFileSync('tar', ['-xzf', tarPath, '-C', tempDir], {
 					stdio: 'inherit',
 				}),
 			catch: cause => new ExtractError({cause}),
