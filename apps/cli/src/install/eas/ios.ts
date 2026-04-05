@@ -27,7 +27,7 @@ const EasBuildSchema = Schema.Struct({
 	buildProfile: Schema.String,
 	isForIosSimulator: Schema.Boolean,
 	artifacts: Schema.Struct({
-		buildUrl: Schema.optional(Schema.String),
+		buildUrl: Schema.String,
 	}),
 	appVersion: Schema.optional(Schema.String),
 	createdAt: Schema.String,
@@ -65,9 +65,7 @@ const findSimulatorBuild = (
 	builds: typeof EasBuildListSchema.Type,
 ) =>
 	Effect.gen(function* () {
-		const simulatorBuilds = builds.filter(
-			b => b.isForIosSimulator && b.artifacts.buildUrl,
-		);
+		const simulatorBuilds = builds.filter(b => b.isForIosSimulator);
 		const latest = simulatorBuilds.at(0);
 		if (!latest) {
 			return yield* new NoSimulatorBuildError({
@@ -152,7 +150,7 @@ export const installEasIosEffect = () =>
 			Effect.gen(function* () {
 				yield* Effect.logInfo('Downloading build artifact...');
 				const tarPath = yield* downloadArtifact(
-					build.artifacts.buildUrl!,
+					build.artifacts.buildUrl,
 					tempDir,
 				);
 
