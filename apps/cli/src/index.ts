@@ -3,6 +3,7 @@ import {getVersion} from './lib/utils';
 import {registerActions} from './actions';
 import {serverCmd} from './server';
 import {deviceCmd} from './device';
+import {installCmd} from './install';
 
 const program = new Command();
 
@@ -15,5 +16,6 @@ registerActions(program);
 
 program.addCommand(serverCmd);
 program.addCommand(deviceCmd);
+program.addCommand(installCmd);
 
 program.parse();

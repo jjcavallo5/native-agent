@@ -10,3 +10,4 @@ dist/
 
 # Misc
 .claude
+.DS_Store

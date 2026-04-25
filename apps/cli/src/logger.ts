@@ -1,6 +1,5 @@
 import {Logger} from 'effect';
 import chalk from 'chalk';
-import {LogLevel} from 'effect';
 
 // Custom logger that outputs log messages to the console
 const logger = Logger.make(({logLevel, message}) => {
@@ -15,7 +14,8 @@ const logger = Logger.make(({logLevel, message}) => {
 		}
 		return String(v);
 	};
-	const msg = message instanceof Array ? message.map(fmt).join(' ') : fmt(message);
+	const msg =
+		message instanceof Array ? message.map(fmt).join(' ') : fmt(message);
 	switch (logLevel.label) {
 		case 'DEBUG':
 			globalThis.console.log(chalk.blue(logTag), msg);
